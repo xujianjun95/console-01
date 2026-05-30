@@ -10,34 +10,60 @@
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 
-  /* ── 黑暗模式（默认，现代 Braun）── */
-  :root, :root[data-theme="dark"] {
-    --bg: #181818; --card: #242424; --text: #F5F5F5; --dim: #A0A0A0;
-    --line: #3A3A3A; --btn: #2F2F2F; --accent: #E67E22;
-    --groove: #141414; --thumb: #C8C8C8; --shadow: rgba(0,0,0,.4);
-    --btn-press-text: #fff;
+  /* ── 默认：博朗 拟物 · 奶白塑料 ── */
+  :root, :root[data-theme="light"] {
+    --bg1:#DAD8D1; --bg2:#C9C7BF;
+    --card-top:#F2F0EA; --card-bot:#E2E0D8;
+    --text:#33322D; --dim:#8E8C82;
+    --line:rgba(0,0,0,.07);
+    --accent:#EC5E2A; --accent-top:#F7824F; --accent-bot:#D84C19;
+    --groove:#C5C3BA; --groove-sh:rgba(0,0,0,.22);
+    --btn-top:#F3F1EB; --btn-bot:#E0DED6;
+    --thumb-top:#FBFAF7; --thumb-bot:#D7D5CD;
+    --hi:rgba(255,255,255,.8);
+    --drop:rgba(45,42,35,.20);
+    --lcd-bg1:#C4C9BD; --lcd-bg2:#B2B7AA;
+    --lcd-on:#2C302A; --lcd-off:rgba(44,48,42,.10);
+    --lcd-cal:rgba(44,48,42,.55);
+    --scan:rgba(0,0,0,.05);
+    --time-glow:none;
+    --btn-press-text:#fff;
   }
-  /* ── 白天模式（Braun 原教旨）── */
-  :root[data-theme="light"] {
-    --bg: #F4F4F2; --card: #FFFFFF; --text: #1A1A1A; --dim: #6B6B6B;
-    --line: #D8D8D8; --btn: #EAEAEA; --accent: #E67E22;
-    --groove: #E2E2E2; --thumb: #3A3A3A; --shadow: rgba(0,0,0,.1);
-    --btn-press-text: #fff;
+
+  /* ── 暗色：石墨塑料变体 ── */
+  :root[data-theme="dark"] {
+    --bg1:#1c1c1e; --bg2:#121214;
+    --card-top:#2c2c2e; --card-bot:#232325;
+    --text:#F2F1ED; --dim:#8E8C86;
+    --line:rgba(255,255,255,.06);
+    --accent:#EC6A2C; --accent-top:#F7884C; --accent-bot:#DC551A;
+    --groove:#111113; --groove-sh:rgba(0,0,0,.6);
+    --btn-top:#343436; --btn-bot:#28282a;
+    --thumb-top:#C8C8C8; --thumb-bot:#A4A4A4;
+    --hi:rgba(255,255,255,.08);
+    --drop:rgba(0,0,0,.5);
+    --lcd-bg1:#15130f; --lcd-bg2:#100e0b;
+    --lcd-on:var(--accent); --lcd-off:rgba(236,106,44,.12);
+    --lcd-cal:rgba(255,255,255,.55);
+    --scan:rgba(0,0,0,.2);
+    --time-glow:0 0 9px rgba(236,106,44,.55), 0 0 26px rgba(236,106,44,.3);
+    --btn-press-text:#fff;
   }
 
   html, body {
     width: 100%; height: 100%; overflow: hidden;
-    color: var(--text); background: var(--bg);
-    font-family: -apple-system, "SF Pro Display", "PingFang SC", sans-serif;
+    color: var(--text);
+    background: linear-gradient(165deg, var(--bg1), var(--bg2));
+    font-family: -apple-system, "SF Pro Display", "Helvetica Neue", "PingFang SC", sans-serif;
     -webkit-user-select: none; user-select: none;
-    transition: background .3s ease, color .3s ease;
+    transition: background .35s ease, color .35s ease;
   }
   svg { display: block; }
 
   .rotate-tip {
     display: none; position: fixed; inset: 0; z-index: 99;
     flex-direction: column; align-items: center; justify-content: center; gap: 18px; color: var(--dim);
-    background: var(--bg);
+    background: linear-gradient(165deg, var(--bg1), var(--bg2));
   }
   .rotate-tip .ph { width: 80px; height: 46px; border: 3px solid var(--dim); border-radius: 9px; animation: tilt 2.2s ease-in-out infinite; }
   .rotate-tip p { font-size: 14px; letter-spacing: 2px; }
@@ -47,123 +73,152 @@
     position: fixed; inset: 0;
     display: flex; flex-direction: row;
     padding:
-      max(env(safe-area-inset-top),    8px)
-      max(env(safe-area-inset-right), 10px)
-      max(env(safe-area-inset-bottom), 8px)
-      max(env(safe-area-inset-left),  10px);
-    gap: 8px;
+      max(env(safe-area-inset-top),    9px)
+      max(env(safe-area-inset-right), 11px)
+      max(env(safe-area-inset-bottom), 9px)
+      max(env(safe-area-inset-left),  11px);
+    gap: 9px;
   }
   @media (orientation: portrait) { .rotate-tip{display:flex} .wrap{display:none} }
 
+  /* ── 奶白塑料面板 ── */
   .module {
-    border-radius: 14px; border: 1px solid var(--line); background: var(--card);
-    box-shadow: 0 2px 8px var(--shadow);
-    padding: 9px 10px; display: flex; flex-direction: column; flex-shrink: 0;
-    transition: background .3s ease, border-color .3s ease;
+    border-radius: 20px; border: 1px solid var(--line);
+    background: linear-gradient(180deg, var(--card-top), var(--card-bot));
+    box-shadow:
+      inset 0 1px 0 var(--hi),
+      inset 0 -1px 2px rgba(0,0,0,.05),
+      0 1px 1px rgba(0,0,0,.05),
+      0 10px 22px var(--drop);
+    padding: 11px 12px; display: flex; flex-direction: column; flex-shrink: 0;
+    transition: background .35s ease, border-color .35s ease;
   }
   .mod-title {
-    font-size: 10px; color: var(--dim); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 5px;
-    display: flex; align-items: center; justify-content: center; gap: 6px;
+    position: relative; width: 100%; text-align: center;
+    font-size: 10px; color: var(--dim); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 6px;
   }
-  .mod-title::before {   /* Braun 功能指示点 */
-    content: ''; flex: 0 0 auto; width: 5px; height: 5px; border-radius: 1px; background: var(--accent);
+  .mod-title::before {   /* Braun 功能指示点：定位在左角，不挤文字 */
+    content: ''; position: absolute; left: 0; top: 50%; transform: translateY(-50%);
+    width: 5px; height: 5px; border-radius: 1px; background: var(--accent);
   }
 
   /* ── 推子 ── */
-  .fader-mod { width: 56px; align-items: center; }
-  .readout { font-size: 13px; font-weight: 700; color: var(--accent); font-variant-numeric: tabular-nums; margin-bottom: 3px; height: 17px; }
+  .fader-mod { width: 58px; align-items: center; }
+  .readout { font-size: 13px; font-weight: 700; color: var(--accent); font-variant-numeric: tabular-nums; margin-bottom: 4px; height: 17px; }
   .track-groove {
     flex: 1; position: relative; width: 100%; min-height: 0;
     display: flex; align-items: center; justify-content: center;
     touch-action: none; cursor: pointer;
   }
   .track-groove::before {
-    content: ''; position: absolute; left: 50%; top: 6px; bottom: 6px; width: 12px;
-    transform: translateX(-50%); border-radius: 6px; background: var(--groove);
-    box-shadow: inset 0 1px 3px rgba(0,0,0,.3);
+    content: ''; position: absolute; left: 50%; top: 6px; bottom: 6px; width: 14px;
+    transform: translateX(-50%); border-radius: 7px; background: var(--groove);
+    box-shadow: inset 0 2px 4px var(--groove-sh), inset 0 -1px 0 var(--hi);
   }
   .fill-bar {
-    position: absolute; left: 50%; bottom: 6px; width: 12px;
-    transform: translateX(-50%); border-radius: 0 0 6px 6px; background: var(--accent);
+    position: absolute; left: 50%; bottom: 6px; width: 14px;
+    transform: translateX(-50%); border-radius: 0 0 7px 7px;
+    background: linear-gradient(180deg, var(--accent-top), var(--accent-bot));
     pointer-events: none;
   }
   .thumb {
     position: absolute; left: 50%; pointer-events: none;
-    width: 30px; height: 16px; transform: translateX(-50%); border-radius: 4px;
-    background: var(--thumb); box-shadow: 0 1px 3px rgba(0,0,0,.4);
+    width: 34px; height: 16px; transform: translateX(-50%); border-radius: 5px;
+    background: linear-gradient(180deg, var(--thumb-top), var(--thumb-bot));
+    box-shadow: 0 2px 4px rgba(0,0,0,.3), inset 0 1px 0 rgba(255,255,255,.7);
+  }
+  .thumb::after {   /* 盖帽中线刻痕 */
+    content: ''; position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%);
+    width: 16px; height: 2px; border-radius: 2px; background: rgba(0,0,0,.16);
   }
 
   /* ── 中间：时钟 + 快捷 ── */
-  .center-mod { flex: 1.95; min-width: 0; padding-top: 0; padding-bottom: 0; justify-content: space-evenly; }
+  .center-mod { flex: 1.95; min-width: 0; padding-top: 11px; padding-bottom: 11px; justify-content: flex-start; gap: 11px; }
   .clock-area { flex: 0 0 auto; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
 
-  /* 显示屏：两个模式都保持深色窗口（像真实电子钟） */
+  /* 显示屏：LCD 液晶（淡青灰底 + 段码） */
   .clock-screen {
     position: relative; overflow: hidden; flex: 0 0 auto;
-    height: 200px; padding: 0 26px; border-radius: 14px;
+    width: 100%; height: 210px; padding: 0 26px; border-radius: 14px;
     display: flex; flex-direction: column; align-items: center; justify-content: center;
-    background: #141210;
-    box-shadow: inset 0 2px 8px rgba(0,0,0,.7), inset 0 0 0 1px rgba(0,0,0,.5), 0 1px 0 rgba(255,255,255,.06);
+    background: linear-gradient(160deg, var(--lcd-bg1), var(--lcd-bg2));
+    box-shadow: inset 0 2px 6px rgba(0,0,0,.32), inset 0 0 0 2px rgba(0,0,0,.06), 0 1px 0 var(--hi);
   }
   .clock-screen::before {   /* 顶部反光弧 */
     content: ''; position: absolute; inset: 0; border-radius: 14px; pointer-events: none; z-index: 2;
-    background: radial-gradient(135% 90% at 50% -12%, rgba(255,255,255,.06), transparent 55%);
+    background: radial-gradient(135% 90% at 50% -12%, rgba(255,255,255,.18), transparent 55%);
   }
-  .clock-screen::after {    /* CRT 扫描线 + 暗角 */
+  .clock-screen::after {    /* 细密扫描线 */
     content: ''; position: absolute; inset: 0; border-radius: 14px; pointer-events: none; z-index: 2;
-    background: repeating-linear-gradient(0deg, rgba(0,0,0,.22) 0 1px, transparent 1px 3px);
-    box-shadow: inset 0 0 40px rgba(0,0,0,.6);
+    background: repeating-linear-gradient(0deg, var(--scan) 0 1px, transparent 1px 3px);
   }
-  .scr-tag {
-    position: absolute; top: 6px; left: 12px; z-index: 3;
-    font-size: 8px; font-weight: 600; letter-spacing: 2px; color: rgba(255,255,255,.32);
+  .scr-tag {   /* BRAUN 字标 */
+    position: absolute; top: 10px; left: 14px; z-index: 3;
+    font-family: "Helvetica Neue", Arial, sans-serif;
+    font-size: 13px; font-weight: 800; letter-spacing: 1.5px; color: var(--lcd-on); opacity: .5;
+  }
+  .scr-model {   /* 型号标 */
+    position: absolute; bottom: 9px; right: 14px; z-index: 3;
+    font-size: 9px; letter-spacing: 1px; color: var(--lcd-cal);
   }
   .time {
-    text-align: center;
-    font-size: clamp(58px, 22vh, 100px); font-weight: 600; line-height: .82;
-    letter-spacing: 4px; font-variant-numeric: tabular-nums;
+    position: relative; text-align: center; white-space: nowrap;
+    font-size: clamp(44px, 16vh, 64px); font-weight: 600; line-height: .82;
+    letter-spacing: 1px; font-variant-numeric: tabular-nums;
   }
-  .time .real { color: var(--accent); text-shadow: 0 0 9px rgba(230,126,34,.6), 0 0 26px rgba(230,126,34,.35); }
-  .colon { display: inline-block; transform: translateY(-0.06em); animation: blink 1.05s steps(1) infinite; }
+  .time .ghost {   /* 背后未点亮的 88:88 段码 */
+    position: absolute; left: 0; right: 0; top: 0; z-index: 0;
+    color: var(--lcd-off); pointer-events: none;
+  }
+  .time .real { position: relative; z-index: 1; color: var(--lcd-on); text-shadow: var(--time-glow); }
+  .colon { display: inline-block; transform: translateY(-0.06em); }
+  .real .colon { animation: blink 1.05s steps(1) infinite; }
   @keyframes blink { 50%{opacity:.25} }
   .cal {
-    text-align: center; margin-top: 35px;
+    position: relative; z-index: 1;
+    text-align: center; margin-top: 34px;
     font-size: 12px; font-weight: 500; letter-spacing: 1px;
-    color: rgba(255,255,255,.55);
+    color: var(--lcd-cal);
   }
 
-  /* ── 实体键（Braun 扁平） ── */
+  /* ── 实体键 ── */
   .key, .gkey {
     cursor: pointer; border: 1px solid var(--line); color: var(--text); font-family: inherit;
-    background: var(--btn);
-    transition: transform .1s ease, background .12s ease, color .12s ease, box-shadow .1s ease;
+    background: linear-gradient(180deg, var(--btn-top), var(--btn-bot));
+    box-shadow: inset 0 1px 0 var(--hi), 0 1px 2px rgba(0,0,0,.12), 0 3px 6px rgba(0,0,0,.07);
+    transition: transform .1s ease, background .12s ease, color .12s ease, box-shadow .12s ease;
   }
-  .key { flex: 1; display: flex; align-items: center; justify-content: center; border-radius: 8px; }
+  .key { flex: 1; display: flex; align-items: center; justify-content: center; border-radius: 12px; }
   .key.pressed, .gkey.pressed {
-    transform: scale(.95); background: var(--accent); color: var(--btn-press-text); border-color: var(--accent);
+    transform: translateY(1px) scale(.97);
+    background: linear-gradient(180deg, var(--accent-top), var(--accent-bot));
+    color: var(--btn-press-text); border-color: var(--accent-bot);
+    box-shadow: inset 0 2px 4px rgba(0,0,0,.25);
   }
-  .key.accent {            /* Braun 红功能键 */
-    background: var(--accent); color: #fff; border-color: var(--accent);
+  .key.accent {            /* 橙色球面实体键 */
+    background: radial-gradient(circle at 35% 28%, var(--accent-top), var(--accent-bot));
+    color: #fff; border-color: var(--accent-bot);
+    box-shadow: 0 3px 7px rgba(0,0,0,.28), inset 0 1px 1px rgba(255,255,255,.45);
   }
 
   .gkey {
     font-size: 10px; font-weight: 600; letter-spacing: .3px;
-    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
-    border-radius: 6px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px;
+    border-radius: 14px;
   }
-  .gkey svg { width: 19px; height: 19px; }
+  .gkey svg { width: 20px; height: 20px; }
   .grid6 {
-    flex: 0 0 auto; display: grid;
+    flex: 1; min-height: 0; display: grid;
     grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(2, 1fr);
-    gap: 7px; height: 116px;
+    gap: 8px;
   }
 
   /* ── 系统模块 ── */
   .stats-mod { flex: 0 0 auto; }
   .stat-row { display: flex; align-items: center; gap: 7px; padding: 5px 1px; }
   .stat-key { font-size: 10px; color: var(--dim); letter-spacing: 1px; width: 26px; flex: 0 0 auto; }
-  .stat-bar-wrap { flex: 1; height: 5px; background: var(--groove); border-radius: 3px; overflow: hidden; }
-  .stat-bar-fill { height: 100%; border-radius: 3px; background: var(--accent); transition: width .5s; }
+  .stat-bar-wrap { flex: 1; height: 6px; background: var(--groove); border-radius: 4px; overflow: hidden; box-shadow: inset 0 1px 2px var(--groove-sh); }
+  .stat-bar-fill { height: 100%; border-radius: 4px; background: linear-gradient(90deg, var(--accent-bot), var(--accent-top)); transition: width .5s; }
   .stat-num { font-size: 11px; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--text); width: 34px; text-align: right; flex: 0 0 auto; }
   .net-row { display: flex; justify-content: space-around; padding: 8px 1px 2px; }
   .net-item { display: flex; align-items: center; gap: 5px; }
@@ -174,26 +229,27 @@
   .music-mod { flex: 1; min-height: 0; }
   .cover {
     flex: 1; min-height: 0; aspect-ratio: 1 / 1; align-self: center; max-width: 100%;
-    border-radius: 10px; margin-bottom: 8px; position: relative; overflow: hidden;
+    border-radius: 12px; margin-bottom: 8px; position: relative; overflow: hidden;
     background: var(--groove); border: 1px solid var(--line);
+    box-shadow: inset 0 1px 3px rgba(0,0,0,.25);
   }
-  .cover img { width: 100%; height: 100%; object-fit: cover; border-radius: 10px; opacity: 0; transition: opacity .45s ease; }
+  .cover img { width: 100%; height: 100%; object-fit: cover; border-radius: 12px; opacity: 0; transition: opacity .45s ease; }
   .track-name  { flex: 0 0 auto; font-size: 12px; font-weight: 600; color: var(--text); text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .artist-name { flex: 0 0 auto; font-size: 10px; color: var(--dim); text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
-  .music-keys  { flex: 0 0 auto; display: flex; gap: 14px; align-items: center; justify-content: center; height: 58px; margin-top: 8px; }
-  .music-keys .key { flex: 0 0 auto; width: 40px; height: 40px; border-radius: 50%; }
+  .music-keys  { flex: 0 0 auto; display: flex; gap: 14px; align-items: center; justify-content: center; height: 60px; margin-top: 8px; }
+  .music-keys .key { flex: 0 0 auto; width: 42px; height: 42px; border-radius: 50%; }
   .music-keys .key svg { width: 16px; height: 16px; }
-  .music-keys .key.accent { width: 54px; height: 54px; }
+  .music-keys .key.accent { width: 56px; height: 56px; }
   .music-keys .key.accent svg { width: 24px; height: 24px; }
 
   /* ── 状态灯 ── */
   .led-box { display: none; }
 
-  /* ── 主题开关（显示屏右下角） ── */
+  /* ── 主题开关（显示屏右上角） ── */
   .theme-toggle {
-    position: absolute; right: 8px; bottom: 7px; z-index: 3;
+    position: absolute; right: 10px; top: 9px; z-index: 3;
     width: 24px; height: 24px; border-radius: 50%; cursor: pointer;
-    border: 1px solid rgba(255,255,255,.2); background: rgba(255,255,255,.1); color: #fff;
+    border: 1px solid rgba(0,0,0,.12); background: rgba(0,0,0,.06); color: var(--lcd-on);
     display: flex; align-items: center; justify-content: center; font-size: 12px;
   }
   .theme-toggle:active { transform: scale(.9); }
@@ -228,12 +284,14 @@
     <div class="module center-mod">
       <div class="clock-area">
         <div class="clock-screen">
-          <span class="scr-tag">CONSOLE · 01</span>
+          <span class="scr-tag">BRAUN</span>
+          <button class="theme-toggle" id="themeToggle">🌙</button>
           <div class="time">
+            <span class="ghost">88<span class="colon">:</span>88</span>
             <span class="real"><span id="hh">--</span><span class="colon">:</span><span id="mm">--</span></span>
           </div>
           <div class="cal" id="cal">----</div>
-          <button class="theme-toggle" id="themeToggle">🌙</button>
+          <span class="scr-model">console·01</span>
         </div>
       </div>
       <div class="grid6">
@@ -259,7 +317,7 @@
     </div>
 
     <!-- 右列：系统 + 音乐 -->
-    <div class="right-col" style="display:flex;flex-direction:column;gap:8px;flex:1.1;min-width:0;">
+    <div class="right-col" style="display:flex;flex-direction:column;gap:9px;flex:1.1;min-width:0;">
       <div class="module stats-mod">
         <div class="mod-title">系统</div>
         <div class="stat-row">
@@ -308,7 +366,7 @@ function setTheme(t) {
   localStorage.setItem('theme', t);
   $('themeToggle').textContent = t === 'dark' ? '☀️' : '🌙';
 }
-setTheme(localStorage.getItem('theme') || 'dark');
+setTheme(localStorage.getItem('theme') || 'light');
 $('themeToggle').addEventListener('click', () => setTheme(root.dataset.theme === 'dark' ? 'light' : 'dark'));
 
 function syncFader(groove, fill, thumb, pct) {
