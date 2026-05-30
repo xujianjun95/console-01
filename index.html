@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="中控台">
+<title>Mac 中控台</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  /* ── 黑暗模式（默认，现代 Braun）── */
+  :root, :root[data-theme="dark"] {
+    --bg: #181818; --card: #242424; --text: #F5F5F5; --dim: #A0A0A0;
+    --line: #3A3A3A; --btn: #2F2F2F; --accent: #E67E22;
+    --groove: #141414; --thumb: #C8C8C8; --shadow: rgba(0,0,0,.4);
+    --btn-press-text: #fff;
+  }
+  /* ── 白天模式（Braun 原教旨）── */
+  :root[data-theme="light"] {
+    --bg: #F4F4F2; --card: #FFFFFF; --text: #1A1A1A; --dim: #6B6B6B;
+    --line: #D8D8D8; --btn: #EAEAEA; --accent: #E67E22;
+    --groove: #E2E2E2; --thumb: #3A3A3A; --shadow: rgba(0,0,0,.1);
+    --btn-press-text: #fff;
+  }
+
+  html, body {
+    width: 100%; height: 100%; overflow: hidden;
+    color: var(--text); background: var(--bg);
+    font-family: -apple-system, "SF Pro Display", "PingFang SC", sans-serif;
+    -webkit-user-select: none; user-select: none;
+    transition: background .3s ease, color .3s ease;
+  }
+  svg { display: block; }
+
+  .rotate-tip {
+    display: none; position: fixed; inset: 0; z-index: 99;
+    flex-direction: column; align-items: center; justify-content: center; gap: 18px; color: var(--dim);
+    background: var(--bg);
+  }
+  .rotate-tip .ph { width: 80px; height: 46px; border: 3px solid var(--dim); border-radius: 9px; animation: tilt 2.2s ease-in-out infinite; }
+  .rotate-tip p { font-size: 14px; letter-spacing: 2px; }
+  @keyframes tilt { 0%,40%{transform:rotate(0)} 70%,100%{transform:rotate(-90deg)} }
+
+  .wrap {
+    position: fixed; inset: 0;
+    display: flex; flex-direction: row;
+    padding:
+      max(env(safe-area-inset-top),    8px)
+      max(env(safe-area-inset-right), 10px)
+      max(env(safe-area-inset-bottom), 8px)
+      max(env(safe-area-inset-left),  10px);
+    gap: 8px;
+  }
+  @media (orientation: portrait) { .rotate-tip{display:flex} .wrap{display:none} }
+
+  .module {
+    border-radius: 14px; border: 1px solid var(--line); background: var(--card);
+    box-shadow: 0 2px 8px var(--shadow);
+    padding: 9px 10px; display: flex; flex-direction: column; flex-shrink: 0;
+    transition: background .3s ease, border-color .3s ease;
+  }
+  .mod-title {
+    font-size: 10px; color: var(--dim); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 5px;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+  }
+  .mod-title::before {   /* Braun 功能指示点 */
+    content: ''; flex: 0 0 auto; width: 5px; height: 5px; border-radius: 1px; background: var(--accent);
+  }
+
+  /* ── 推子 ── */
+  .fader-mod { width: 56px; align-items: center; }
+  .readout { font-size: 13px; font-weight: 700; color: var(--accent); font-variant-numeric: tabular-nums; margin-bottom: 3px; height: 17px; }
+  .track-groove {
+    flex: 1; position: relative; width: 100%; min-height: 0;
+    display: flex; align-items: center; justify-content: center;
+    touch-action: none; cursor: pointer;
+  }
+  .track-groove::before {
+    content: ''; position: absolute; left: 50%; top: 6px; bottom: 6px; width: 12px;
+    transform: translateX(-50%); border-radius: 6px; background: var(--groove);
+    box-shadow: inset 0 1px 3px rgba(0,0,0,.3);
+  }
+  .fill-bar {
+    position: absolute; left: 50%; bottom: 6px; width: 12px;
+    transform: translateX(-50%); border-radius: 0 0 6px 6px; background: var(--accent);
+    pointer-events: none;
+  }
+  .thumb {
+    position: absolute; left: 50%; pointer-events: none;
+    width: 30px; height: 16px; transform: translateX(-50%); border-radius: 4px;
+    background: var(--thumb); box-shadow: 0 1px 3px rgba(0,0,0,.4);
+  }
+
+  /* ── 中间：时钟 + 快捷 ── */
+  .center-mod { flex: 1.95; min-width: 0; padding-top: 0; padding-bottom: 0; justify-content: space-evenly; }
+  .clock-area { flex: 0 0 auto; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+
+  /* 显示屏：两个模式都保持深色窗口（像真实电子钟） */
+  .clock-screen {
+    position: relative; overflow: hidden; flex: 0 0 auto;
+    height: 200px; padding: 0 26px; border-radius: 14px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    background: #141210;
+    box-shadow: inset 0 2px 8px rgba(0,0,0,.7), inset 0 0 0 1px rgba(0,0,0,.5), 0 1px 0 rgba(255,255,255,.06);
+  }
+  .clock-screen::before {   /* 顶部反光弧 */
+    content: ''; position: absolute; inset: 0; border-radius: 14px; pointer-events: none; z-index: 2;
+    background: radial-gradient(135% 90% at 50% -12%, rgba(255,255,255,.06), transparent 55%);
+  }
+  .clock-screen::after {    /* CRT 扫描线 + 暗角 */
+    content: ''; position: absolute; inset: 0; border-radius: 14px; pointer-events: none; z-index: 2;
+    background: repeating-linear-gradient(0deg, rgba(0,0,0,.22) 0 1px, transparent 1px 3px);
+    box-shadow: inset 0 0 40px rgba(0,0,0,.6);
+  }
+  .scr-tag {
+    position: absolute; top: 6px; left: 12px; z-index: 3;
+    font-size: 8px; font-weight: 600; letter-spacing: 2px; color: rgba(255,255,255,.32);
+  }
+  .time {
+    text-align: center;
+    font-size: clamp(58px, 22vh, 100px); font-weight: 600; line-height: .82;
+    letter-spacing: 4px; font-variant-numeric: tabular-nums;
+  }
+  .time .real { color: var(--accent); text-shadow: 0 0 9px rgba(230,126,34,.6), 0 0 26px rgba(230,126,34,.35); }
+  .colon { display: inline-block; transform: translateY(-0.06em); animation: blink 1.05s steps(1) infinite; }
+  @keyframes blink { 50%{opacity:.25} }
+  .cal {
+    text-align: center; margin-top: 35px;
+    font-size: 12px; font-weight: 500; letter-spacing: 1px;
+    color: rgba(255,255,255,.55);
+  }
+
+  /* ── 实体键（Braun 扁平） ── */
+  .key, .gkey {
+    cursor: pointer; border: 1px solid var(--line); color: var(--text); font-family: inherit;
+    background: var(--btn);
+    transition: transform .1s ease, background .12s ease, color .12s ease, box-shadow .1s ease;
+  }
+  .key { flex: 1; display: flex; align-items: center; justify-content: center; border-radius: 8px; }
+  .key.pressed, .gkey.pressed {
+    transform: scale(.95); background: var(--accent); color: var(--btn-press-text); border-color: var(--accent);
+  }
+  .key.accent {            /* Braun 红功能键 */
+    background: var(--accent); color: #fff; border-color: var(--accent);
+  }
+
+  .gkey {
+    font-size: 10px; font-weight: 600; letter-spacing: .3px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+    border-radius: 6px;
+  }
+  .gkey svg { width: 19px; height: 19px; }
+  .grid6 {
+    flex: 0 0 auto; display: grid;
+    grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(2, 1fr);
+    gap: 7px; height: 116px;
+  }
+
+  /* ── 系统模块 ── */
+  .stats-mod { flex: 0 0 auto; }
+  .stat-row { display: flex; align-items: center; gap: 7px; padding: 5px 1px; }
+  .stat-key { font-size: 10px; color: var(--dim); letter-spacing: 1px; width: 26px; flex: 0 0 auto; }
+  .stat-bar-wrap { flex: 1; height: 5px; background: var(--groove); border-radius: 3px; overflow: hidden; }
+  .stat-bar-fill { height: 100%; border-radius: 3px; background: var(--accent); transition: width .5s; }
+  .stat-num { font-size: 11px; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--text); width: 34px; text-align: right; flex: 0 0 auto; }
+  .net-row { display: flex; justify-content: space-around; padding: 8px 1px 2px; }
+  .net-item { display: flex; align-items: center; gap: 5px; }
+  .net-arrow { font-size: 12px; color: var(--dim); }
+  .net-val { font-size: 12px; font-weight: 600; color: var(--text); font-variant-numeric: tabular-nums; }
+
+  /* ── 音乐模块 ── */
+  .music-mod { flex: 1; min-height: 0; }
+  .cover {
+    flex: 1; min-height: 0; aspect-ratio: 1 / 1; align-self: center; max-width: 100%;
+    border-radius: 10px; margin-bottom: 8px; position: relative; overflow: hidden;
+    background: var(--groove); border: 1px solid var(--line);
+  }
+  .cover img { width: 100%; height: 100%; object-fit: cover; border-radius: 10px; opacity: 0; transition: opacity .45s ease; }
+  .track-name  { flex: 0 0 auto; font-size: 12px; font-weight: 600; color: var(--text); text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .artist-name { flex: 0 0 auto; font-size: 10px; color: var(--dim); text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
+  .music-keys  { flex: 0 0 auto; display: flex; gap: 14px; align-items: center; justify-content: center; height: 58px; margin-top: 8px; }
+  .music-keys .key { flex: 0 0 auto; width: 40px; height: 40px; border-radius: 50%; }
+  .music-keys .key svg { width: 16px; height: 16px; }
+  .music-keys .key.accent { width: 54px; height: 54px; }
+  .music-keys .key.accent svg { width: 24px; height: 24px; }
+
+  /* ── 状态灯 ── */
+  .led-box { display: none; }
+
+  /* ── 主题开关（显示屏右下角） ── */
+  .theme-toggle {
+    position: absolute; right: 8px; bottom: 7px; z-index: 3;
+    width: 24px; height: 24px; border-radius: 50%; cursor: pointer;
+    border: 1px solid rgba(255,255,255,.2); background: rgba(255,255,255,.1); color: #fff;
+    display: flex; align-items: center; justify-content: center; font-size: 12px;
+  }
+  .theme-toggle:active { transform: scale(.9); }
+</style>
+</head>
+<body>
+  <div class="rotate-tip"><div class="ph"></div><p>请 横 屏 使 用</p></div>
+
+  <div class="wrap">
+
+    <!-- 音量 -->
+    <div class="module fader-mod">
+      <div class="mod-title">音量</div>
+      <div class="readout" id="volVal">--</div>
+      <div class="track-groove" id="volGroove">
+        <div class="fill-bar" id="volFill"></div>
+        <div class="thumb"    id="volThumb"></div>
+      </div>
+    </div>
+
+    <!-- 亮度 -->
+    <div class="module fader-mod">
+      <div class="mod-title">亮度</div>
+      <div class="readout" id="briVal">--</div>
+      <div class="track-groove" id="briGroove">
+        <div class="fill-bar" id="briFill"></div>
+        <div class="thumb"    id="briThumb"></div>
+      </div>
+    </div>
+
+    <!-- 中间：时钟 + 快捷 -->
+    <div class="module center-mod">
+      <div class="clock-area">
+        <div class="clock-screen">
+          <span class="scr-tag">CONSOLE · 01</span>
+          <div class="time">
+            <span class="real"><span id="hh">--</span><span class="colon">:</span><span id="mm">--</span></span>
+          </div>
+          <div class="cal" id="cal">----</div>
+          <button class="theme-toggle" id="themeToggle">🌙</button>
+        </div>
+      </div>
+      <div class="grid6">
+        <button class="gkey" onclick="sys('lock')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>锁屏
+        </button>
+        <button class="gkey" onclick="sys('displaysleep')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M9 20h6M12 16v4"/></svg>息屏
+        </button>
+        <button class="gkey" onclick="sys('sleep')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8 8 0 0 1 9.5 4a7 7 0 1 0 10.5 10.5z"/></svg>睡眠
+        </button>
+        <button class="gkey" onclick="sys('app_codex')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>Codex
+        </button>
+        <button class="gkey" onclick="sys('app_claude')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2z"/><path d="M8 12h8M12 8v8"/></svg>Claude
+        </button>
+        <button class="gkey" onclick="sys('app_terminal')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>终端
+        </button>
+      </div>
+    </div>
+
+    <!-- 右列：系统 + 音乐 -->
+    <div class="right-col" style="display:flex;flex-direction:column;gap:8px;flex:1.1;min-width:0;">
+      <div class="module stats-mod">
+        <div class="mod-title">系统</div>
+        <div class="stat-row">
+          <span class="stat-key">CPU</span>
+          <div class="stat-bar-wrap"><div class="stat-bar-fill" id="cpuBar" style="width:0%"></div></div>
+          <span class="stat-num" id="sCpu">--</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-key">内存</span>
+          <div class="stat-bar-wrap"><div class="stat-bar-fill" id="memBar" style="width:0%"></div></div>
+          <span class="stat-num" id="sMem">--</span>
+        </div>
+        <div class="net-row">
+          <div class="net-item"><span class="net-arrow">↓</span><span class="net-val" id="sRx">--</span></div>
+          <div class="net-item"><span class="net-arrow">↑</span><span class="net-val" id="sTx">--</span></div>
+        </div>
+      </div>
+
+      <div class="module music-mod">
+        <div class="mod-title">音乐</div>
+        <div class="cover"><img id="cover" alt=""></div>
+        <div class="track-name"  id="track">—</div>
+        <div class="artist-name" id="artist">—</div>
+        <div class="music-keys">
+          <button class="key" onclick="music('prev')"><svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="2.4" height="14" rx="1"/><path d="M19 5.5v13a1 1 0 0 1-1.6.8l-8-6.5a1 1 0 0 1 0-1.6l8-6.5A1 1 0 0 1 19 5.5z"/></svg></button>
+          <button class="key accent" id="playBtn" onclick="music('playpause')"></button>
+          <button class="key" onclick="music('next')"><svg viewBox="0 0 24 24" fill="currentColor"><rect x="15.6" y="5" width="2.4" height="14" rx="1"/><path d="M5 5.5v13a1 1 0 0 0 1.6.8l8-6.5a1 1 0 0 0 0-1.6l-8-6.5A1 1 0 0 0 5 5.5z"/></svg></button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+<script>
+const $ = id => document.getElementById(id);
+let dragging = false, briCli = false, lastPlaying = null, lastTrack = null;
+
+const ICON_PLAY  = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 5.5v13a1 1 0 0 0 1.5.9l11-6.5a1 1 0 0 0 0-1.8l-11-6.5A1 1 0 0 0 7 5.5z"/></svg>';
+const ICON_PAUSE = '<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6.5" y="5" width="4" height="14" rx="1.2"/><rect x="13.5" y="5" width="4" height="14" rx="1.2"/></svg>';
+$('playBtn').innerHTML = ICON_PLAY;
+
+// 主题切换
+const root = document.documentElement;
+function setTheme(t) {
+  root.dataset.theme = t;
+  localStorage.setItem('theme', t);
+  $('themeToggle').textContent = t === 'dark' ? '☀️' : '🌙';
+}
+setTheme(localStorage.getItem('theme') || 'dark');
+$('themeToggle').addEventListener('click', () => setTheme(root.dataset.theme === 'dark' ? 'light' : 'dark'));
+
+function syncFader(groove, fill, thumb, pct) {
+  pct = Math.max(0, Math.min(100, pct));
+  const pad = 6, h = Math.max(0, groove.clientHeight - pad * 2);
+  const pos = h * pct / 100;
+  fill.style.height  = pos + 'px';
+  thumb.style.bottom = (pad + pos - 8) + 'px';
+}
+function setupFader(grooveEl, fillEl, thumbEl, readoutEl, initVal, onCommit) {
+  let val = initVal;
+  function getVal(clientY) {
+    const rect = grooveEl.getBoundingClientRect(), pad = 6, h = rect.height - pad * 2;
+    return Math.max(0, Math.min(100, Math.round((rect.bottom - clientY - pad) / h * 100)));
+  }
+  function update(v) { val = v; syncFader(grooveEl, fillEl, thumbEl, v); readoutEl.textContent = v; }
+  grooveEl.addEventListener('pointerdown', e => { e.preventDefault(); grooveEl.setPointerCapture(e.pointerId); dragging = true; update(getVal(e.clientY)); });
+  grooveEl.addEventListener('pointermove', e => { if (!grooveEl.hasPointerCapture(e.pointerId)) return; update(getVal(e.clientY)); });
+  ['pointerup','pointercancel'].forEach(ev => grooveEl.addEventListener(ev, e => {
+    if (!grooveEl.hasPointerCapture(e.pointerId)) return;
+    grooveEl.releasePointerCapture(e.pointerId); onCommit(val); setTimeout(() => dragging = false, 400);
+  }));
+  update(initVal);
+  return { get: () => val, set: v => update(v) };
+}
+
+const volFader = setupFader($('volGroove'), $('volFill'), $('volThumb'), $('volVal'), 50, v => api('/api/volume', {value: v}));
+const briFader = setupFader($('briGroove'), $('briFill'), $('briThumb'), $('briVal'),
+  parseInt(localStorage.getItem('briLocal') || '50', 10), v => {
+    if (briCli) { api('/api/brightness', {value: v}); }
+    else {
+      const prev = parseInt(localStorage.getItem('briLocal') || '50', 10);
+      let delta = v - prev;
+      if (v === 0) delta = -100; else if (v === 100) delta = 100;
+      if (delta) api('/api/brightness', {delta});
+      localStorage.setItem('briLocal', v);
+    }
+  });
+function recalcFaders() {
+  syncFader($('volGroove'), $('volFill'), $('volThumb'), volFader.get());
+  syncFader($('briGroove'), $('briFill'), $('briThumb'), briFader.get());
+}
+function recalcSoon() { [0,100,350,700].forEach(t => setTimeout(recalcFaders, t)); }
+window.addEventListener('resize', recalcSoon);
+window.addEventListener('orientationchange', recalcSoon);
+window.addEventListener('load', recalcSoon);
+requestAnimationFrame(recalcFaders);
+
+function tick() {
+  const d = new Date();
+  $('hh').textContent = String(d.getHours()).padStart(2,'0');
+  $('mm').textContent = String(d.getMinutes()).padStart(2,'0');
+  $('cal').textContent = `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日 星期${'日一二三四五六'[d.getDay()]}`;
+}
+tick(); setInterval(tick, 1000);
+
+async function api(path, body) {
+  try { return await (await fetch(path, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body||{}) })).json(); }
+  catch(e) { return null; }
+}
+
+function music(action) {
+  if (action === 'playpause') { lastPlaying = !lastPlaying; $('playBtn').innerHTML = lastPlaying ? ICON_PAUSE : ICON_PLAY; }
+  api('/api/music', {action});
+  if (action === 'prev' || action === 'next') { setTimeout(refreshStatus, 300); setTimeout(refreshStatus, 900); }
+}
+function sys(action) {
+  if (action === 'sleep' && !confirm('确定让 Mac 睡眠？')) return;
+  api('/api/system', {action});
+}
+
+async function refreshStatus() {
+  try {
+    const s = await (await fetch('/api/status')).json();
+    briCli = !!s.brightnessCli;
+    if (!dragging) {
+      if (s.volume != null) volFader.set(s.volume);
+      if (briCli && s.brightness != null) briFader.set(s.brightness);
+    }
+    if (s.playing !== lastPlaying) { lastPlaying = s.playing; $('playBtn').innerHTML = s.playing ? ICON_PAUSE : ICON_PLAY; }
+    const raw = s.track || '—';
+    const sep = raw.indexOf(' — ');
+    $('track').textContent  = sep > -1 ? raw.slice(0, sep)  : raw;
+    $('artist').textContent = sep > -1 ? raw.slice(sep + 3) : '';
+    if (s.track !== lastTrack) {
+      lastTrack = s.track;
+      const img = $('cover');
+      if (s.cover) {
+        const url = s.cover === '/api/cover' ? '/api/cover?t=' + encodeURIComponent(s.track) : s.cover;
+        img.style.opacity = 0;
+        const pre = new Image();
+        pre.onload = () => { img.src = url; requestAnimationFrame(() => img.style.opacity = 1); };
+        pre.onerror = () => { img.removeAttribute('src'); img.style.opacity = 0; };
+        pre.src = url;
+      } else { img.style.opacity = 0; setTimeout(() => img.removeAttribute('src'), 450); }
+    }
+  } catch(e) {}
+}
+
+async function refreshStats() {
+  try {
+    const s = await (await fetch('/api/stats')).json();
+    const cpu = s.cpu ?? 0, mem = s.mem ?? 0;
+    $('sCpu').textContent = s.cpu != null ? cpu + '%' : '--';
+    $('sMem').textContent = s.mem != null ? mem + '%' : '--';
+    $('cpuBar').style.width = cpu + '%';
+    $('memBar').style.width = mem + '%';
+    $('sRx').textContent = (s.net_rx || '0B') + '/s';
+    $('sTx').textContent = (s.net_tx || '0B') + '/s';
+  } catch(e) {}
+}
+
+// 按钮按下脉冲
+document.querySelectorAll('.key, .gkey').forEach(btn => {
+  btn.addEventListener('pointerdown', () => {
+    btn.classList.add('pressed');
+    setTimeout(() => btn.classList.remove('pressed'), 220);
+  });
+});
+
+refreshStatus(); setInterval(refreshStatus, 3000);
+refreshStats();  setInterval(refreshStats, 5000);
+</script>
+</body>
+</html>
