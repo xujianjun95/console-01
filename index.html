@@ -8,6 +8,14 @@
 <meta name="apple-mobile-web-app-title" content="中控台">
 <title>Mac 中控台</title>
 <style>
+@font-face {
+  font-family: 'DSEG7Modern';
+  src: url('data:font/woff2;base64,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') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+}
+</style>
+<style>
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 
   /* ── 默认：博朗 拟物 · 奶白塑料 ── */
@@ -27,6 +35,8 @@
     --lcd-cal:rgba(44,48,42,.55);
     --scan:rgba(0,0,0,.05);
     --time-glow:none;
+    --dot:rgba(0,0,0,.28);
+    --tick:#BDBDBD; --tick-major:#6A6A6A;
     --btn-press-text:#fff;
   }
 
@@ -47,6 +57,8 @@
     --lcd-cal:rgba(255,255,255,.55);
     --scan:rgba(0,0,0,.2);
     --time-glow:0 0 9px rgba(236,106,44,.55), 0 0 26px rgba(236,106,44,.3);
+    --dot:rgba(255,255,255,.18);
+    --tick:#505050; --tick-major:#909090;
     --btn-press-text:#fff;
   }
 
@@ -83,7 +95,7 @@
 
   /* ── 奶白塑料面板 ── */
   .module {
-    border-radius: 20px; border: 1px solid var(--line);
+    border-radius: 7px; border: 1px solid var(--line);
     background: linear-gradient(180deg, var(--card-top), var(--card-bot));
     box-shadow:
       inset 0 1px 0 var(--hi),
@@ -97,39 +109,36 @@
     position: relative; width: 100%; text-align: center;
     font-size: 10px; color: var(--dim); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 6px;
   }
-  .mod-title::before {   /* Braun 功能指示点：定位在左角，不挤文字 */
-    content: ''; position: absolute; left: 0; top: 50%; transform: translateY(-50%);
-    width: 5px; height: 5px; border-radius: 1px; background: var(--accent);
-  }
+  .mod-title::before { display: none; }
 
-  /* ── 推子 ── */
+  /* ── ET66 计算器风格推子 ── */
   .fader-mod { width: 58px; align-items: center; }
-  .readout { font-size: 13px; font-weight: 700; color: var(--accent); font-variant-numeric: tabular-nums; margin-bottom: 4px; height: 17px; }
-  .track-groove {
+  .readout {
+    font-size: 13px; font-weight: 700; color: var(--accent);
+    font-variant-numeric: tabular-nums; height: 17px; margin-top: 4px;
+  }
+  .et66-track {
     flex: 1; position: relative; width: 100%; min-height: 0;
-    display: flex; align-items: center; justify-content: center;
     touch-action: none; cursor: pointer;
   }
-  .track-groove::before {
-    content: ''; position: absolute; left: 50%; top: 6px; bottom: 6px; width: 14px;
-    transform: translateX(-50%); border-radius: 7px; background: var(--groove);
-    box-shadow: inset 0 2px 4px var(--groove-sh), inset 0 -1px 0 var(--hi);
+  .et66-ticks {
+    position: absolute; top: 6px; bottom: 6px; left: 50%; transform: translateX(-50%);
+    display: flex; flex-direction: column; justify-content: space-between;
+    align-items: center; pointer-events: none;
   }
-  .fill-bar {
-    position: absolute; left: 50%; bottom: 6px; width: 14px;
-    transform: translateX(-50%); border-radius: 0 0 7px 7px;
-    background: linear-gradient(180deg, var(--accent-top), var(--accent-bot));
+  .et66-tick {
+    display: block; width: 16px; height: 1.5px;
+    background: var(--tick); border-radius: 1px; flex-shrink: 0;
+  }
+  .et66-tick.major { width: 26px; height: 2px; background: var(--tick-major); }
+  .et66-dot {
+    position: absolute; left: 50%;
+    width: 10px; height: 10px; border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 1px 4px rgba(0,0,0,.28);
     pointer-events: none;
-  }
-  .thumb {
-    position: absolute; left: 50%; pointer-events: none;
-    width: 34px; height: 16px; transform: translateX(-50%); border-radius: 5px;
-    background: linear-gradient(180deg, var(--thumb-top), var(--thumb-bot));
-    box-shadow: 0 2px 4px rgba(0,0,0,.3), inset 0 1px 0 rgba(255,255,255,.7);
-  }
-  .thumb::after {   /* 盖帽中线刻痕 */
-    content: ''; position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%);
-    width: 16px; height: 2px; border-radius: 2px; background: rgba(0,0,0,.16);
+    transform: translate(-50%, -50%);
+    z-index: 1;
   }
 
   /* ── 中间：时钟 + 快捷 ── */
@@ -139,7 +148,7 @@
   /* 显示屏：LCD 液晶（淡青灰底 + 段码） */
   .clock-screen {
     position: relative; overflow: hidden; flex: 0 0 auto;
-    width: 100%; height: 210px; padding: 0 26px; border-radius: 14px;
+    width: 100%; height: 150px; padding: 0 26px; border-radius: 7px;
     display: flex; flex-direction: column; align-items: center; justify-content: center;
     background: linear-gradient(160deg, var(--lcd-bg1), var(--lcd-bg2));
     box-shadow: inset 0 2px 6px rgba(0,0,0,.32), inset 0 0 0 2px rgba(0,0,0,.06), 0 1px 0 var(--hi);
@@ -163,8 +172,9 @@
   }
   .time {
     position: relative; text-align: center; white-space: nowrap;
-    font-size: clamp(44px, 16vh, 64px); font-weight: 600; line-height: .82;
-    letter-spacing: 1px; font-variant-numeric: tabular-nums;
+    font-family: 'DSEG7Modern', monospace;
+    font-size: clamp(40px, 15vh, 62px); font-weight: 400; line-height: 1;
+    letter-spacing: 2px; font-variant-numeric: tabular-nums;
   }
   .time .ghost {   /* 背后未点亮的 88:88 段码 */
     position: absolute; left: 0; right: 0; top: 0; z-index: 0;
@@ -181,6 +191,45 @@
     color: var(--lcd-cal);
   }
 
+  /* ── 点阵 + 主题开关行 ── */
+  .grille-row {
+    flex: 0 0 auto; display: flex; flex-direction: row;
+    align-items: center; gap: 10px; height: 40px;
+  }
+  .grille-row .grille { flex: 1; height: 100%; }
+  .theme-sw {
+    flex: 0 0 auto; cursor: pointer; -webkit-user-select: none;
+  }
+  .sw-track {
+    width: 72px; height: 34px; border-radius: 17px;
+    background: var(--groove);
+    border: 1px solid var(--line);
+    box-shadow: inset 0 2px 5px var(--groove-sh);
+    position: relative;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 9px;
+  }
+  .sw-label {
+    font-size: 11px; font-weight: 300; color: var(--text); opacity: .4;
+    font-family: "Helvetica Neue", Arial, sans-serif;
+    position: relative; z-index: 0; line-height: 1;
+  }
+  .sw-knob {
+    position: absolute; left: 3px;
+    width: 28px; height: 28px; border-radius: 50%;
+    background: linear-gradient(160deg, var(--card-top), var(--card-bot));
+    border: 1px solid var(--line);
+    box-shadow: 0 2px 6px rgba(0,0,0,.3), inset 0 1px 0 var(--hi);
+    transition: left .28s cubic-bezier(.4,0,.2,1);
+    z-index: 1;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .sw-knob::after {
+    content: ''; width: 12px; height: 2.5px;
+    background: var(--accent); border-radius: 2px;
+  }
+  :root[data-theme="dark"] .sw-knob { left: calc(100% - 31px); }
+
   /* ── 实体键 ── */
   .key, .gkey {
     cursor: pointer; border: 1px solid var(--line); color: var(--text); font-family: inherit;
@@ -188,52 +237,114 @@
     box-shadow: inset 0 1px 0 var(--hi), 0 1px 2px rgba(0,0,0,.12), 0 3px 6px rgba(0,0,0,.07);
     transition: transform .1s ease, background .12s ease, color .12s ease, box-shadow .12s ease;
   }
-  .key { flex: 1; display: flex; align-items: center; justify-content: center; border-radius: 12px; }
+  .key { flex: 1; display: flex; align-items: center; justify-content: center; border-radius: 7px; }
   .key.pressed, .gkey.pressed {
     transform: translateY(1px) scale(.97);
     background: linear-gradient(180deg, var(--accent-top), var(--accent-bot));
     color: var(--btn-press-text); border-color: var(--accent-bot);
     box-shadow: inset 0 2px 4px rgba(0,0,0,.25);
   }
-  .key.accent {            /* 橙色球面实体键 */
-    background: radial-gradient(circle at 35% 28%, var(--accent-top), var(--accent-bot));
-    color: #fff; border-color: var(--accent-bot);
-    box-shadow: 0 3px 7px rgba(0,0,0,.28), inset 0 1px 1px rgba(255,255,255,.45);
-  }
-
   .gkey {
-    font-size: 10px; font-weight: 600; letter-spacing: .3px;
-    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px;
-    border-radius: 14px;
+    font-size: 9px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+    border-radius: 7px;
   }
-  .gkey svg { width: 20px; height: 20px; }
+  .gkey::before { content: '○'; font-size: 10px; flex-shrink: 0; line-height: 1; }
+  .gkey.pressed { background: linear-gradient(180deg, var(--btn-top), var(--btn-bot)); color: var(--text); border-color: var(--line); box-shadow: inset 0 1px 0 var(--hi), 0 1px 2px rgba(0,0,0,.12); }
+  .gkey.pressed::before { content: '●'; color: var(--accent); }
   .grid6 {
     flex: 1; min-height: 0; display: grid;
     grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(2, 1fr);
     gap: 8px;
   }
 
-  /* ── 系统模块 ── */
-  .stats-mod { flex: 0 0 auto; }
-  .stat-row { display: flex; align-items: center; gap: 7px; padding: 5px 1px; }
-  .stat-key { font-size: 10px; color: var(--dim); letter-spacing: 1px; width: 26px; flex: 0 0 auto; }
-  .stat-bar-wrap { flex: 1; height: 6px; background: var(--groove); border-radius: 4px; overflow: hidden; box-shadow: inset 0 1px 2px var(--groove-sh); }
-  .stat-bar-fill { height: 100%; border-radius: 4px; background: linear-gradient(90deg, var(--accent-bot), var(--accent-top)); transition: width .5s; }
-  .stat-num { font-size: 11px; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--text); width: 34px; text-align: right; flex: 0 0 auto; }
-  .net-row { display: flex; justify-content: space-around; padding: 8px 1px 2px; }
-  .net-item { display: flex; align-items: center; gap: 5px; }
-  .net-arrow { font-size: 12px; color: var(--dim); }
-  .net-val { font-size: 12px; font-weight: 600; color: var(--text); font-variant-numeric: tabular-nums; }
+  .key.accent {            /* 橙色球面实体键 */
+    background: radial-gradient(circle at 35% 28%, var(--accent-top), var(--accent-bot));
+    color: #fff; border-color: var(--accent-bot);
+    box-shadow: 0 3px 7px rgba(0,0,0,.28), inset 0 1px 1px rgba(255,255,255,.45);
+  }
+
+  /* ── Braun 面板按钮 ── */
+  .panel-col {
+    flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 6px;
+  }
+  .panel-row {
+    flex: 1; min-height: 0; display: flex; gap: 0;
+  }
+  .theme-btns { display: flex; flex-direction: row; gap: 4px; }
+  .theme-btns .pkey { flex: 1; }
+  .panel-section {
+    flex: 1; display: flex; flex-direction: column;
+    padding: 0 6px;
+  }
+  .panel-head {
+    font-size: 8px; font-weight: 700; letter-spacing: .15em; text-transform: uppercase;
+    color: var(--dim); padding: 3px 0 5px; margin-bottom: 2px;
+    border-bottom: 1px solid var(--line);
+  }
+  .pkey {
+    cursor: pointer; border: none; background: transparent; box-shadow: none;
+    color: var(--dim); font-family: inherit;
+    font-size: 9px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase;
+    display: flex; align-items: center; gap: 5px; text-align: left;
+    padding: 0; flex: 1; min-height: 0; border-radius: 0;
+    transition: color .1s ease;
+    -webkit-user-select: none;
+  }
+  .pkey::before { content: '○'; font-size: 8px; flex-shrink: 0; line-height: 1; }
+  .pkey.running::before { content: '●'; color: var(--accent); }
+  .pkey.pressed { color: var(--text); }
+  .pkey.pressed::before { content: '●'; color: var(--accent); }
+
+  /* ── 系统信息面板（左列） ── */
+  .sys-panel { flex: 0 0 115px; gap: 6px; }
+  .sys-meter { display: flex; flex-direction: column; gap: 2px; }
+  .sys-meter-head { display: flex; justify-content: space-between; align-items: baseline; }
+  .sys-lbl { font-size: 9px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--dim); }
+  .sys-val { font-size: 11px; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--text); }
+  .sys-divider { height: 1px; background: var(--line); }
+  .sys-item { display: flex; justify-content: space-between; align-items: baseline; }
+  .sys-track { pointer-events: none !important; cursor: default !important; height: 18px; }
+
+  /* ── 横向 ET66 推子 ── */
+  .hfader-mod { flex: 0 0 auto; justify-content: center; gap: 8px; }
+  .et66h-row { display: flex; align-items: center; gap: 6px; height: 26px; }
+  .et66h-lbl { font-size: 8px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--dim); width: 20px; flex-shrink: 0; }
+  .et66h-track { flex: 1; height: 100%; position: relative; touch-action: none; cursor: pointer; }
+  .et66h-ticks {
+    position: absolute; left: 6px; right: 6px; top: 50%; transform: translateY(-50%);
+    display: flex; flex-direction: row; justify-content: space-between;
+    align-items: center; pointer-events: none;
+  }
+  .et66h-tick { display: block; width: 1.5px; height: 10px; background: var(--tick); border-radius: 1px; flex-shrink: 0; }
+  .et66h-tick.major { height: 16px; width: 2px; background: var(--tick-major); }
+  .et66h-dot {
+    position: absolute; top: 50%;
+    width: 10px; height: 10px; border-radius: 50%;
+    background: var(--accent); box-shadow: 0 1px 4px rgba(0,0,0,.28);
+    pointer-events: none; transform: translate(-50%, -50%); z-index: 1;
+  }
+  .et66h-row .readout { font-size: 11px; height: auto; margin-top: 0; width: 22px; text-align: right; flex-shrink: 0; }
+
+  /* ── 扬声器格栅（与时钟下方点阵相同样式，圆形裁切） ── */
+  .speaker-grille {
+    flex: 1; min-height: 0; width: 100%; aspect-ratio: 1; max-width: 100%;
+    align-self: center; margin-bottom: 8px;
+    border-radius: 50%; overflow: hidden;
+    background-image: radial-gradient(circle, var(--dot) 25%, transparent 26%);
+    background-size: 8px 8px;
+    background-repeat: round;
+  }
 
   /* ── 音乐模块 ── */
   .music-mod { flex: 1; min-height: 0; }
   .cover {
     flex: 1; min-height: 0; aspect-ratio: 1 / 1; align-self: center; max-width: 100%;
-    border-radius: 12px; margin-bottom: 8px; position: relative; overflow: hidden;
+    border-radius: 7px; margin-bottom: 8px; position: relative; overflow: hidden;
     background: var(--groove); border: 1px solid var(--line);
     box-shadow: inset 0 1px 3px rgba(0,0,0,.25);
   }
-  .cover img { width: 100%; height: 100%; object-fit: cover; border-radius: 12px; opacity: 0; transition: opacity .45s ease; }
+  .cover img { width: 100%; height: 100%; object-fit: cover; border-radius: 7px; opacity: 0; transition: opacity .45s ease; }
   .track-name  { flex: 0 0 auto; font-size: 12px; font-weight: 600; color: var(--text); text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .artist-name { flex: 0 0 auto; font-size: 10px; color: var(--dim); text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
   .music-keys  { flex: 0 0 auto; display: flex; gap: 14px; align-items: center; justify-content: center; height: 60px; margin-top: 8px; }
@@ -241,6 +352,16 @@
   .music-keys .key svg { width: 16px; height: 16px; }
   .music-keys .key.accent { width: 56px; height: 56px; }
   .music-keys .key.accent svg { width: 24px; height: 24px; }
+
+  /* ── 博朗扬声器网格装饰条 ── */
+  .grille {
+    flex: 0 0 auto;
+    height: 40px;   /* 恰好 5 × 8px = 5 行，无截断 */
+    border-radius: 7px;
+    background-image: radial-gradient(circle, var(--dot) 25%, transparent 26%);
+    background-size: 8px 8px;
+    background-repeat: round;   /* 横向自动整除，圆点不截断 */
+  }
 
   /* ── 状态灯 ── */
   .led-box { display: none; }
@@ -262,22 +383,22 @@
 
     <!-- 音量 -->
     <div class="module fader-mod">
-      <div class="mod-title">音量</div>
-      <div class="readout" id="volVal">--</div>
-      <div class="track-groove" id="volGroove">
-        <div class="fill-bar" id="volFill"></div>
-        <div class="thumb"    id="volThumb"></div>
+      <div class="mod-title">VOL</div>
+      <div class="et66-track" id="volTrack">
+        <div class="et66-ticks" id="volTicks"></div>
+        <div class="et66-dot"  id="volDot"></div>
       </div>
+      <div class="readout" id="volVal">--</div>
     </div>
 
     <!-- 亮度 -->
     <div class="module fader-mod">
-      <div class="mod-title">亮度</div>
-      <div class="readout" id="briVal">--</div>
-      <div class="track-groove" id="briGroove">
-        <div class="fill-bar" id="briFill"></div>
-        <div class="thumb"    id="briThumb"></div>
+      <div class="mod-title">BRI</div>
+      <div class="et66-track" id="briTrack">
+        <div class="et66-ticks" id="briTicks"></div>
+        <div class="et66-dot"  id="briDot"></div>
       </div>
+      <div class="readout" id="briVal">--</div>
     </div>
 
     <!-- 中间：时钟 + 快捷 -->
@@ -285,7 +406,7 @@
       <div class="clock-area">
         <div class="clock-screen">
           <span class="scr-tag">BRAUN</span>
-          <button class="theme-toggle" id="themeToggle">🌙</button>
+
           <div class="time">
             <span class="ghost">88<span class="colon">:</span>88</span>
             <span class="real"><span id="hh">--</span><span class="colon">:</span><span id="mm">--</span></span>
@@ -294,25 +415,23 @@
           <span class="scr-model">console·01</span>
         </div>
       </div>
+      <div class="grille-row">
+        <div class="grille"></div>
+        <div class="theme-sw" onclick="setTheme(document.documentElement.dataset.theme==='dark'?'light':'dark')">
+          <div class="sw-track">
+            <span class="sw-label">I</span>
+            <div class="sw-knob"></div>
+            <span class="sw-label">O</span>
+          </div>
+        </div>
+      </div>
       <div class="grid6">
-        <button class="gkey" onclick="sys('lock')">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>锁屏
-        </button>
-        <button class="gkey" onclick="sys('displaysleep')">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M9 20h6M12 16v4"/></svg>息屏
-        </button>
-        <button class="gkey" onclick="sys('sleep')">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8 8 0 0 1 9.5 4a7 7 0 1 0 10.5 10.5z"/></svg>睡眠
-        </button>
-        <button class="gkey" onclick="sys('app_codex')">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>Codex
-        </button>
-        <button class="gkey" onclick="sys('app_claude')">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2z"/><path d="M8 12h8M12 8v8"/></svg>Claude
-        </button>
-        <button class="gkey" onclick="sys('app_terminal')">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>终端
-        </button>
+        <button class="gkey" onclick="sys('lock')">Lock</button>
+        <button class="gkey" onclick="sys('displaysleep')">Display</button>
+        <button class="gkey" onclick="sys('sleep')">Sleep</button>
+        <button class="gkey" onclick="sys('app_codex')">Codex</button>
+        <button class="gkey" onclick="sys('app_claude')">Claude</button>
+        <button class="gkey" onclick="sys('app_terminal')">Term</button>
       </div>
     </div>
 
@@ -338,7 +457,8 @@
 
       <div class="module music-mod">
         <div class="mod-title">音乐</div>
-        <div class="cover"><img id="cover" alt=""></div>
+        <div class="speaker-grille"></div>
+        <img id="cover" alt="" style="display:none">
         <div class="track-name"  id="track">—</div>
         <div class="artist-name" id="artist">—</div>
         <div class="music-keys">
@@ -364,37 +484,50 @@ const root = document.documentElement;
 function setTheme(t) {
   root.dataset.theme = t;
   localStorage.setItem('theme', t);
-  $('themeToggle').textContent = t === 'dark' ? '☀️' : '🌙';
+  const tg = $('themeToggle'); if (tg) tg.textContent = t === 'dark' ? '☀️' : '🌙';
+  const tl = $('themeLight'), td = $('themeDark');
+  if (tl && td) {
+    tl.classList.toggle('running', t === 'light');
+    td.classList.toggle('running', t === 'dark');
+  }
 }
 setTheme(localStorage.getItem('theme') || 'light');
-$('themeToggle').addEventListener('click', () => setTheme(root.dataset.theme === 'dark' ? 'light' : 'dark'));
 
-function syncFader(groove, fill, thumb, pct) {
-  pct = Math.max(0, Math.min(100, pct));
-  const pad = 6, h = Math.max(0, groove.clientHeight - pad * 2);
-  const pos = h * pct / 100;
-  fill.style.height  = pos + 'px';
-  thumb.style.bottom = (pad + pos - 8) + 'px';
+// ── ET66 纵向刻度推子 ──
+function buildTicks(el) {
+  for (let i = 0; i <= 20; i++) {
+    const t = document.createElement('div');
+    t.className = 'et66-tick' + (i % 5 === 0 ? ' major' : '');
+    el.appendChild(t);
+  }
 }
-function setupFader(grooveEl, fillEl, thumbEl, readoutEl, initVal, onCommit) {
+buildTicks($('volTicks'));
+buildTicks($('briTicks'));
+
+function syncET66(trackEl, dotEl, pct) {
+  pct = Math.max(0, Math.min(100, pct));
+  const pad = 6, h = Math.max(0, trackEl.clientHeight - pad * 2);
+  dotEl.style.top = (pad + (1 - pct / 100) * h) + 'px';
+}
+function setupET66(trackEl, dotEl, readoutEl, initVal, onCommit) {
   let val = initVal;
   function getVal(clientY) {
-    const rect = grooveEl.getBoundingClientRect(), pad = 6, h = rect.height - pad * 2;
+    const rect = trackEl.getBoundingClientRect(), pad = 6, h = rect.height - pad * 2;
     return Math.max(0, Math.min(100, Math.round((rect.bottom - clientY - pad) / h * 100)));
   }
-  function update(v) { val = v; syncFader(grooveEl, fillEl, thumbEl, v); readoutEl.textContent = v; }
-  grooveEl.addEventListener('pointerdown', e => { e.preventDefault(); grooveEl.setPointerCapture(e.pointerId); dragging = true; update(getVal(e.clientY)); });
-  grooveEl.addEventListener('pointermove', e => { if (!grooveEl.hasPointerCapture(e.pointerId)) return; update(getVal(e.clientY)); });
-  ['pointerup','pointercancel'].forEach(ev => grooveEl.addEventListener(ev, e => {
-    if (!grooveEl.hasPointerCapture(e.pointerId)) return;
-    grooveEl.releasePointerCapture(e.pointerId); onCommit(val); setTimeout(() => dragging = false, 400);
+  function update(v) { val = v; syncET66(trackEl, dotEl, v); readoutEl.textContent = v; }
+  trackEl.addEventListener('pointerdown', e => { e.preventDefault(); trackEl.setPointerCapture(e.pointerId); dragging = true; update(getVal(e.clientY)); });
+  trackEl.addEventListener('pointermove', e => { if (!trackEl.hasPointerCapture(e.pointerId)) return; update(getVal(e.clientY)); });
+  ['pointerup','pointercancel'].forEach(ev => trackEl.addEventListener(ev, e => {
+    if (!trackEl.hasPointerCapture(e.pointerId)) return;
+    trackEl.releasePointerCapture(e.pointerId); onCommit(val); setTimeout(() => dragging = false, 400);
   }));
   update(initVal);
   return { get: () => val, set: v => update(v) };
 }
 
-const volFader = setupFader($('volGroove'), $('volFill'), $('volThumb'), $('volVal'), 50, v => api('/api/volume', {value: v}));
-const briFader = setupFader($('briGroove'), $('briFill'), $('briThumb'), $('briVal'),
+const volFader = setupET66($('volTrack'), $('volDot'), $('volVal'), 50, v => api('/api/volume', {value: v}));
+const briFader = setupET66($('briTrack'), $('briDot'), $('briVal'),
   parseInt(localStorage.getItem('briLocal') || '50', 10), v => {
     if (briCli) { api('/api/brightness', {value: v}); }
     else {
@@ -406,8 +539,8 @@ const briFader = setupFader($('briGroove'), $('briFill'), $('briThumb'), $('briV
     }
   });
 function recalcFaders() {
-  syncFader($('volGroove'), $('volFill'), $('volThumb'), volFader.get());
-  syncFader($('briGroove'), $('briFill'), $('briThumb'), briFader.get());
+  syncET66($('volTrack'), $('volDot'), volFader.get());
+  syncET66($('briTrack'), $('briDot'), briFader.get());
 }
 function recalcSoon() { [0,100,350,700].forEach(t => setTimeout(recalcFaders, t)); }
 window.addEventListener('resize', recalcSoon);
@@ -451,6 +584,11 @@ async function refreshStatus() {
     const sep = raw.indexOf(' — ');
     $('track').textContent  = sep > -1 ? raw.slice(0, sep)  : raw;
     $('artist').textContent = sep > -1 ? raw.slice(sep + 3) : '';
+    if (s.apps) {
+      document.querySelectorAll('.pkey[data-app]').forEach(btn => {
+        btn.classList.toggle('running', !!s.apps[btn.dataset.app]);
+      });
+    }
     if (s.track !== lastTrack) {
       lastTrack = s.track;
       const img = $('cover');

@@ -362,6 +362,11 @@ class Handler(BaseHTTPRequestHandler):
                 "track": m["track"],
                 "playing": m["playing"],
                 "cover": m["cover"],
+                "apps": {
+                    "codex":    _app_running("Codex"),
+                    "claude":   _app_running("Claude"),
+                    "terminal": _app_running("Terminal"),
+                },
             })
             return
         if self.path == "/api/stats":
