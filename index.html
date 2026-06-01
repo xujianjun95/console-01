@@ -37,6 +37,7 @@
     --time-glow:none;
     --dot:rgba(0,0,0,.28);
     --tick:#BDBDBD; --tick-major:#6A6A6A;
+    --mon-track:rgba(0,0,0,.07); --mon-cpu:#7CB342; --mon-mem:#EC5E2A; --mon-net:#9A988F;
     --btn-press-text:#fff;
   }
 
@@ -59,6 +60,7 @@
     --time-glow:0 0 9px rgba(236,106,44,.55), 0 0 26px rgba(236,106,44,.3);
     --dot:rgba(255,255,255,.18);
     --tick:#505050; --tick-major:#909090;
+    --mon-track:rgba(255,255,255,.07); --mon-cpu:#8BC34A; --mon-mem:#EC6A2C; --mon-net:#CFCFCF;
     --btn-press-text:#fff;
   }
 
@@ -112,7 +114,10 @@
   .mod-title::before { display: none; }
 
   /* ── ET66 计算器风格推子 ── */
-  .fader-mod { width: 58px; align-items: center; }
+  .fader-mod { width: 96px; flex-direction: row; gap: 8px; }
+  .fader-col {
+    flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center;
+  }
   .readout {
     font-size: 13px; font-weight: 700; color: var(--accent);
     font-variant-numeric: tabular-nums; height: 17px; margin-top: 4px;
@@ -148,7 +153,7 @@
   /* 显示屏：LCD 液晶（淡青灰底 + 段码） */
   .clock-screen {
     position: relative; overflow: hidden; flex: 0 0 auto;
-    width: 100%; height: 150px; padding: 0 26px; border-radius: 7px;
+    width: 100%; height: 122px; padding: 0 26px; border-radius: 7px;
     display: flex; flex-direction: column; align-items: center; justify-content: center;
     background: linear-gradient(160deg, var(--lcd-bg1), var(--lcd-bg2));
     box-shadow: inset 0 2px 6px rgba(0,0,0,.32), inset 0 0 0 2px rgba(0,0,0,.06), 0 1px 0 var(--hi);
@@ -161,11 +166,15 @@
     content: ''; position: absolute; inset: 0; border-radius: 14px; pointer-events: none; z-index: 2;
     background: repeating-linear-gradient(0deg, var(--scan) 0 1px, transparent 1px 3px);
   }
-  .scr-tag {   /* BRAUN 字标 */
-    position: absolute; top: 10px; left: 14px; z-index: 3;
-    font-family: "Helvetica Neue", Arial, sans-serif;
-    font-size: 13px; font-weight: 800; letter-spacing: 1.5px; color: var(--lcd-on); opacity: .5;
+  .brand-row {   /* 外壳顶部：BRAUN logo + 型号，一行 ── */
+    flex: 0 0 auto; display: flex; align-items: center; justify-content: space-between;
+    width: 100%; padding: 0 2px;
   }
+  .brand { flex: 0 0 auto; line-height: 0; }
+  .brand img { display: block; height: 17px; width: auto; mix-blend-mode: multiply; }
+  /* 暗色：反相成白色 logo，黑底用 screen 融入背景 */
+  :root[data-theme="dark"] .brand img { mix-blend-mode: screen; filter: invert(1); }
+  .brand-model { flex: 0 0 auto; font-size: 9px; letter-spacing: 1px; color: var(--dim); }
   .scr-model {   /* 型号标 */
     position: absolute; bottom: 9px; right: 14px; z-index: 3;
     font-size: 9px; letter-spacing: 1px; color: var(--lcd-cal);
@@ -173,7 +182,7 @@
   .time {
     position: relative; text-align: center; white-space: nowrap;
     font-family: 'DSEG7Modern', monospace;
-    font-size: clamp(40px, 15vh, 62px); font-weight: 400; line-height: 1;
+    font-size: clamp(30px, 11vh, 47px); font-weight: 400; line-height: 1;
     letter-spacing: 2px; font-variant-numeric: tabular-nums;
   }
   .time .ghost {   /* 背后未点亮的 88:88 段码 */
@@ -186,7 +195,7 @@
   @keyframes blink { 50%{opacity:.25} }
   .cal {
     position: relative; z-index: 1;
-    text-align: center; margin-top: 34px;
+    text-align: center; margin-top: 12px;
     font-size: 12px; font-weight: 500; letter-spacing: 1px;
     color: var(--lcd-cal);
   }
@@ -245,11 +254,11 @@
     box-shadow: inset 0 2px 4px rgba(0,0,0,.25);
   }
   .gkey {
-    font-size: 9px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase;
-    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+    font-size: 11px; font-weight: 400; letter-spacing: 1px; text-transform: none;
+    display: flex; flex-direction: row; align-items: center; justify-content: center; gap: 8px;
     border-radius: 7px;
   }
-  .gkey::before { content: '○'; font-size: 10px; flex-shrink: 0; line-height: 1; }
+  .gkey::before { content: '○'; font-size: 13px; flex-shrink: 0; line-height: 1; }
   .gkey.pressed { background: linear-gradient(180deg, var(--btn-top), var(--btn-bot)); color: var(--text); border-color: var(--line); box-shadow: inset 0 1px 0 var(--hi), 0 1px 2px rgba(0,0,0,.12); }
   .gkey.pressed::before { content: '●'; color: var(--accent); }
   .grid6 {
@@ -296,57 +305,37 @@
   .pkey.pressed { color: var(--text); }
   .pkey.pressed::before { content: '●'; color: var(--accent); }
 
-  /* ── 系统信息面板（左列） ── */
-  .sys-panel { flex: 0 0 115px; gap: 6px; }
-  .sys-meter { display: flex; flex-direction: column; gap: 2px; }
-  .sys-meter-head { display: flex; justify-content: space-between; align-items: baseline; }
-  .sys-lbl { font-size: 9px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--dim); }
-  .sys-val { font-size: 11px; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--text); }
-  .sys-divider { height: 1px; background: var(--line); }
-  .sys-item { display: flex; justify-content: space-between; align-items: baseline; }
-  .sys-track { pointer-events: none !important; cursor: default !important; height: 18px; }
+  /* ── 系统监控（滚动柱状历史图） ── */
+  .stats-mod { flex: 0 0 auto; gap: 7px; }
+  .mon-row { display: flex; align-items: stretch; gap: 9px; height: 28px; }
+  .mon-info { width: 62px; flex: 0 0 auto; display: flex; flex-direction: column; justify-content: center; gap: 2px; }
+  .mon-lbl { font-size: 11px; font-weight: 700; letter-spacing: .08em; color: var(--text); }
+  .mon-val { font-size: 9px; font-weight: 600; color: var(--dim); font-variant-numeric: tabular-nums; white-space: nowrap; line-height: 1.25; }
+  .mon-dot { width: 6px; height: 6px; border-radius: 50%; margin-top: 1px; }
+  .mon-graph { flex: 1; min-width: 0; display: flex; align-items: flex-end; gap: 1px; height: 100%; }
+  .mon-col { flex: 1; min-width: 0; height: 100%; background: var(--mon-track); border-radius: 1px; display: flex; align-items: flex-end; overflow: hidden; }
+  .mon-fill { width: 100%; border-radius: 1px; height: 0; transition: height .45s linear; }
+  .mon-scale { width: 26px; flex: 0 0 auto; display: flex; flex-direction: column; justify-content: space-between; align-items: flex-end; font-size: 7px; color: var(--dim); padding: 1px 0; }
+  .cpu .mon-fill, .mon-dot.cpu { background: var(--mon-cpu); }
+  .mem .mon-fill, .mon-dot.mem { background: var(--mon-mem); }
+  .net .mon-fill, .mon-dot.net { background: var(--mon-net); }
 
-  /* ── 横向 ET66 推子 ── */
-  .hfader-mod { flex: 0 0 auto; justify-content: center; gap: 8px; }
-  .et66h-row { display: flex; align-items: center; gap: 6px; height: 26px; }
-  .et66h-lbl { font-size: 8px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--dim); width: 20px; flex-shrink: 0; }
-  .et66h-track { flex: 1; height: 100%; position: relative; touch-action: none; cursor: pointer; }
-  .et66h-ticks {
-    position: absolute; left: 6px; right: 6px; top: 50%; transform: translateY(-50%);
-    display: flex; flex-direction: row; justify-content: space-between;
-    align-items: center; pointer-events: none;
+  /* ── 同心环点阵碟（音乐封面区） ── */
+  .disc {
+    flex: 1; min-height: 0; aspect-ratio: 1; align-self: center;
+    position: relative; margin-bottom: 8px;
   }
-  .et66h-tick { display: block; width: 1.5px; height: 10px; background: var(--tick); border-radius: 1px; flex-shrink: 0; }
-  .et66h-tick.major { height: 16px; width: 2px; background: var(--tick-major); }
-  .et66h-dot {
-    position: absolute; top: 50%;
-    width: 10px; height: 10px; border-radius: 50%;
-    background: var(--accent); box-shadow: 0 1px 4px rgba(0,0,0,.28);
-    pointer-events: none; transform: translate(-50%, -50%); z-index: 1;
+  .disc-dot {
+    position: absolute; width: 2.5px; height: 2.5px; border-radius: 50%;
+    background: var(--dot); transform: translate(-50%, -50%);
+    transition: background .4s ease;
   }
-  .et66h-row .readout { font-size: 11px; height: auto; margin-top: 0; width: 22px; text-align: right; flex-shrink: 0; }
-
-  /* ── 扬声器格栅（与时钟下方点阵相同样式，圆形裁切） ── */
-  .speaker-grille {
-    flex: 1; min-height: 0; width: 100%; aspect-ratio: 1; max-width: 100%;
-    align-self: center; margin-bottom: 8px;
-    border-radius: 50%; overflow: hidden;
-    background-image: radial-gradient(circle, var(--dot) 25%, transparent 26%);
-    background-size: 8px 8px;
-    background-repeat: round;
-  }
+  .disc-dot.on { background: var(--dot); }
 
   /* ── 音乐模块 ── */
   .music-mod { flex: 1; min-height: 0; }
-  .cover {
-    flex: 1; min-height: 0; aspect-ratio: 1 / 1; align-self: center; max-width: 100%;
-    border-radius: 7px; margin-bottom: 8px; position: relative; overflow: hidden;
-    background: var(--groove); border: 1px solid var(--line);
-    box-shadow: inset 0 1px 3px rgba(0,0,0,.25);
-  }
-  .cover img { width: 100%; height: 100%; object-fit: cover; border-radius: 7px; opacity: 0; transition: opacity .45s ease; }
-  .track-name  { flex: 0 0 auto; font-size: 12px; font-weight: 600; color: var(--text); text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .artist-name { flex: 0 0 auto; font-size: 10px; color: var(--dim); text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
+  .track-name  { flex: 0 0 auto; font-size: 13px; font-weight: 600; color: var(--text); text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .artist-name { flex: 0 0 auto; font-size: 11px; color: var(--dim); text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
   .music-keys  { flex: 0 0 auto; display: flex; gap: 14px; align-items: center; justify-content: center; height: 60px; margin-top: 8px; }
   .music-keys .key { flex: 0 0 auto; width: 42px; height: 42px; border-radius: 50%; }
   .music-keys .key svg { width: 16px; height: 16px; }
@@ -381,38 +370,39 @@
 
   <div class="wrap">
 
-    <!-- 音量 -->
+    <!-- 音量 + 亮度 -->
     <div class="module fader-mod">
-      <div class="mod-title">VOL</div>
-      <div class="et66-track" id="volTrack">
-        <div class="et66-ticks" id="volTicks"></div>
-        <div class="et66-dot"  id="volDot"></div>
+      <div class="fader-col">
+        <div class="mod-title">VOL</div>
+        <div class="et66-track" id="volTrack">
+          <div class="et66-ticks" id="volTicks"></div>
+          <div class="et66-dot"  id="volDot"></div>
+        </div>
+        <div class="readout" id="volVal">--</div>
       </div>
-      <div class="readout" id="volVal">--</div>
-    </div>
-
-    <!-- 亮度 -->
-    <div class="module fader-mod">
-      <div class="mod-title">BRI</div>
-      <div class="et66-track" id="briTrack">
-        <div class="et66-ticks" id="briTicks"></div>
-        <div class="et66-dot"  id="briDot"></div>
+      <div class="fader-col">
+        <div class="mod-title">BRI</div>
+        <div class="et66-track" id="briTrack">
+          <div class="et66-ticks" id="briTicks"></div>
+          <div class="et66-dot"  id="briDot"></div>
+        </div>
+        <div class="readout" id="briVal">--</div>
       </div>
-      <div class="readout" id="briVal">--</div>
     </div>
 
     <!-- 中间：时钟 + 快捷 -->
     <div class="module center-mod">
+      <div class="brand-row">
+        <div class="brand"><img src="/braun-logo.jpg" alt="BRAUN"></div>
+        <span class="brand-model">console·01</span>
+      </div>
       <div class="clock-area">
         <div class="clock-screen">
-          <span class="scr-tag">BRAUN</span>
-
           <div class="time">
             <span class="ghost">88<span class="colon">:</span>88</span>
             <span class="real"><span id="hh">--</span><span class="colon">:</span><span id="mm">--</span></span>
           </div>
           <div class="cal" id="cal">----</div>
-          <span class="scr-model">console·01</span>
         </div>
       </div>
       <div class="grille-row">
@@ -438,26 +428,37 @@
     <!-- 右列：系统 + 音乐 -->
     <div class="right-col" style="display:flex;flex-direction:column;gap:9px;flex:1.1;min-width:0;">
       <div class="module stats-mod">
-        <div class="mod-title">系统</div>
-        <div class="stat-row">
-          <span class="stat-key">CPU</span>
-          <div class="stat-bar-wrap"><div class="stat-bar-fill" id="cpuBar" style="width:0%"></div></div>
-          <span class="stat-num" id="sCpu">--</span>
+        <div class="mon-row">
+          <div class="mon-info">
+            <div class="mon-lbl">CPU</div>
+            <div class="mon-val" id="sCpu">--</div>
+            <div class="mon-dot cpu"></div>
+          </div>
+          <div class="mon-graph cpu" id="cpuGraph"></div>
+          <div class="mon-scale"><span>100%</span><span>0</span></div>
         </div>
-        <div class="stat-row">
-          <span class="stat-key">内存</span>
-          <div class="stat-bar-wrap"><div class="stat-bar-fill" id="memBar" style="width:0%"></div></div>
-          <span class="stat-num" id="sMem">--</span>
+        <div class="mon-row">
+          <div class="mon-info">
+            <div class="mon-lbl">MEM</div>
+            <div class="mon-val" id="sMem">--</div>
+            <div class="mon-dot mem"></div>
+          </div>
+          <div class="mon-graph mem" id="memGraph"></div>
+          <div class="mon-scale"><span>100%</span><span>0</span></div>
         </div>
-        <div class="net-row">
-          <div class="net-item"><span class="net-arrow">↓</span><span class="net-val" id="sRx">--</span></div>
-          <div class="net-item"><span class="net-arrow">↑</span><span class="net-val" id="sTx">--</span></div>
+        <div class="mon-row">
+          <div class="mon-info">
+            <div class="mon-lbl">NET</div>
+            <div class="mon-val"><span id="sRx">↓--</span><br><span id="sTx">↑--</span></div>
+            <div class="mon-dot net"></div>
+          </div>
+          <div class="mon-graph net" id="netGraph"></div>
+          <div class="mon-scale"><span>100%</span><span>0</span></div>
         </div>
       </div>
 
       <div class="module music-mod">
-        <div class="mod-title">音乐</div>
-        <div class="speaker-grille"></div>
+        <div class="disc" id="disc"></div>
         <img id="cover" alt="" style="display:none">
         <div class="track-name"  id="track">—</div>
         <div class="artist-name" id="artist">—</div>
@@ -604,16 +605,64 @@ async function refreshStatus() {
   } catch(e) {}
 }
 
+// ── 同心环点阵碟 ──
+function buildDisc(el) {
+  const cx = 50, cy = 50, rings = 9, rIn = 15, rOut = 48, HI = 130; // 顶部高亮弧约 130°
+  for (let i = 0; i < rings; i++) {
+    const rad = rIn + (rOut - rIn) * i / (rings - 1);
+    const count = Math.max(8, Math.round(2 * Math.PI * rad / 4.2));
+    for (let k = 0; k < count; k++) {
+      const a = k / count * 360;            // 0 在顶部，顺时针
+      const ang = (a - 90) * Math.PI / 180;
+      const dot = document.createElement('span');
+      dot.className = 'disc-dot' + (a <= HI ? ' on' : '');
+      dot.style.left = (cx + rad * Math.cos(ang)) + '%';
+      dot.style.top  = (cy + rad * Math.sin(ang)) + '%';
+      el.appendChild(dot);
+    }
+  }
+}
+buildDisc($('disc'));
+
+// ── 系统监控柱状图 ──
+const MON_COLS = 40;
+function buildGraph(el) {
+  const cols = [];
+  for (let i = 0; i < MON_COLS; i++) {
+    const col = document.createElement('div'); col.className = 'mon-col';
+    const fill = document.createElement('div'); fill.className = 'mon-fill';
+    col.appendChild(fill); el.appendChild(col); cols.push(fill);
+  }
+  return cols;
+}
+const cpuCols = buildGraph($('cpuGraph'));
+const memCols = buildGraph($('memGraph'));
+const netCols = buildGraph($('netGraph'));
+const cpuHist = new Array(MON_COLS).fill(0);
+const memHist = new Array(MON_COLS).fill(0);
+const netHist = new Array(MON_COLS).fill(0);  // 原始 bps，绘制时按动态峰值归一
+let netPeak = 1;
+
+function pushHist(hist, cols, v, scale) {
+  hist.push(v); hist.shift();
+  for (let i = 0; i < MON_COLS; i++) {
+    cols[i].style.height = Math.max(0, Math.min(100, hist[i] * scale)) + '%';
+  }
+}
+
 async function refreshStats() {
   try {
     const s = await (await fetch('/api/stats')).json();
     const cpu = s.cpu ?? 0, mem = s.mem ?? 0;
     $('sCpu').textContent = s.cpu != null ? cpu + '%' : '--';
     $('sMem').textContent = s.mem != null ? mem + '%' : '--';
-    $('cpuBar').style.width = cpu + '%';
-    $('memBar').style.width = mem + '%';
-    $('sRx').textContent = (s.net_rx || '0B') + '/s';
-    $('sTx').textContent = (s.net_tx || '0B') + '/s';
+    $('sRx').textContent = '↓ ' + (s.net_rx || '0B') + '/s';
+    $('sTx').textContent = '↑ ' + (s.net_tx || '0B') + '/s';
+    pushHist(cpuHist, cpuCols, cpu, 1);
+    pushHist(memHist, memCols, mem, 1);
+    const net = (s.net_rx_bps || 0) + (s.net_tx_bps || 0);
+    netPeak = Math.max(net, Math.max(...netHist), 1024) * 0.96;  // 缓慢回落的峰值基准
+    pushHist(netHist, netCols, net, 100 / netPeak);
   } catch(e) {}
 }
 
@@ -626,7 +675,7 @@ document.querySelectorAll('.key, .gkey').forEach(btn => {
 });
 
 refreshStatus(); setInterval(refreshStatus, 3000);
-refreshStats();  setInterval(refreshStats, 5000);
+refreshStats();  setInterval(refreshStats, 2000);
 </script>
 </body>
 </html>
