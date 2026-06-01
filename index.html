@@ -41,29 +41,6 @@
     --btn-press-text:#fff;
   }
 
-  /* ── 暗色：石墨塑料变体 ── */
-  :root[data-theme="dark"] {
-    --bg1:#1c1c1e; --bg2:#121214;
-    --card-top:#2c2c2e; --card-bot:#232325;
-    --text:#F2F1ED; --dim:#8E8C86;
-    --line:rgba(255,255,255,.06);
-    --accent:#EC6A2C; --accent-top:#F7884C; --accent-bot:#DC551A;
-    --groove:#111113; --groove-sh:rgba(0,0,0,.6);
-    --btn-top:#343436; --btn-bot:#28282a;
-    --thumb-top:#C8C8C8; --thumb-bot:#A4A4A4;
-    --hi:rgba(255,255,255,.08);
-    --drop:rgba(0,0,0,.5);
-    --lcd-bg1:#15130f; --lcd-bg2:#100e0b;
-    --lcd-on:var(--accent); --lcd-off:rgba(236,106,44,.12);
-    --lcd-cal:rgba(255,255,255,.55);
-    --scan:rgba(0,0,0,.2);
-    --time-glow:0 0 9px rgba(236,106,44,.55), 0 0 26px rgba(236,106,44,.3);
-    --dot:rgba(255,255,255,.18);
-    --tick:#505050; --tick-major:#909090;
-    --mon-track:rgba(255,255,255,.07); --mon-cpu:#8BC34A; --mon-mem:#EC6A2C; --mon-net:#CFCFCF;
-    --btn-press-text:#fff;
-  }
-
   html, body {
     width: 100%; height: 100%; overflow: hidden;
     color: var(--text);
@@ -172,8 +149,6 @@
   }
   .brand { flex: 0 0 auto; line-height: 0; }
   .brand img { display: block; height: 17px; width: auto; mix-blend-mode: multiply; }
-  /* 暗色：反相成白色 logo，黑底用 screen 融入背景 */
-  :root[data-theme="dark"] .brand img { mix-blend-mode: screen; filter: invert(1); }
   .brand-model { flex: 0 0 auto; font-size: 9px; letter-spacing: 1px; color: var(--dim); }
   .scr-model {   /* 型号标 */
     position: absolute; bottom: 9px; right: 14px; z-index: 3;
@@ -237,7 +212,14 @@
     content: ''; width: 12px; height: 2.5px;
     background: var(--accent); border-radius: 2px;
   }
-  :root[data-theme="dark"] .sw-knob { left: calc(100% - 31px); }
+  .sw-track.off .sw-knob { left: calc(100% - 31px); }
+
+  /* ── 电源关闭状态 ── */
+  .fader-off .et66-dot { background: var(--dim) !important; box-shadow: none !important; }
+  .fader-off .et66-track { pointer-events: none; cursor: default; }
+  .fader-off .readout { color: var(--dim); }
+
+  /* ── 时钟盖板 ── */
 
   /* ── 实体键 ── */
   .key, .gkey {
@@ -355,14 +337,6 @@
   /* ── 状态灯 ── */
   .led-box { display: none; }
 
-  /* ── 主题开关（显示屏右上角） ── */
-  .theme-toggle {
-    position: absolute; right: 10px; top: 9px; z-index: 3;
-    width: 24px; height: 24px; border-radius: 50%; cursor: pointer;
-    border: 1px solid rgba(0,0,0,.12); background: rgba(0,0,0,.06); color: var(--lcd-on);
-    display: flex; align-items: center; justify-content: center; font-size: 12px;
-  }
-  .theme-toggle:active { transform: scale(.9); }
 </style>
 </head>
 <body>
@@ -407,8 +381,8 @@
       </div>
       <div class="grille-row">
         <div class="grille"></div>
-        <div class="theme-sw" onclick="setTheme(document.documentElement.dataset.theme==='dark'?'light':'dark')">
-          <div class="sw-track">
+        <div class="theme-sw" onclick="togglePower()">
+          <div class="sw-track" id="swTrack">
             <span class="sw-label">I</span>
             <div class="sw-knob"></div>
             <span class="sw-label">O</span>
@@ -474,25 +448,65 @@
 
 <script>
 const $ = id => document.getElementById(id);
-let dragging = false, briCli = false, lastPlaying = null, lastTrack = null;
+let dragging = false, briCli = false, lastPlaying = null, lastTrack = null, powered = true;
+let dischargeTids = [];
+function clearDischarge() { dischargeTids.forEach(clearTimeout); dischargeTids = []; }
 
 const ICON_PLAY  = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 5.5v13a1 1 0 0 0 1.5.9l11-6.5a1 1 0 0 0 0-1.8l-11-6.5A1 1 0 0 0 7 5.5z"/></svg>';
 const ICON_PAUSE = '<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6.5" y="5" width="4" height="14" rx="1.2"/><rect x="13.5" y="5" width="4" height="14" rx="1.2"/></svg>';
 $('playBtn').innerHTML = ICON_PLAY;
 
-// 主题切换
-const root = document.documentElement;
-function setTheme(t) {
-  root.dataset.theme = t;
-  localStorage.setItem('theme', t);
-  const tg = $('themeToggle'); if (tg) tg.textContent = t === 'dark' ? '☀️' : '🌙';
-  const tl = $('themeLight'), td = $('themeDark');
-  if (tl && td) {
-    tl.classList.toggle('running', t === 'light');
-    td.classList.toggle('running', t === 'dark');
+// 电源开关
+function togglePower() {
+  powered = !powered;
+  $('swTrack').classList.toggle('off', !powered);
+  document.querySelector('.fader-mod').classList.toggle('fader-off', !powered);
+  if (!powered) {
+    powerOffAnimation();
+    $('sCpu').textContent = '--'; $('sMem').textContent = '--';
+    $('sRx').textContent = '↓ --'; $('sTx').textContent = '↑ --';
+    document.querySelectorAll('.mon-fill').forEach(el => el.style.height = '0%');
+    $('track').textContent = '—'; $('artist').textContent = '—';
+    $('playBtn').innerHTML = ICON_PLAY; lastPlaying = null;
+  } else {
+    powerOnAnimation();
+    refreshStatus(); refreshStats();
   }
 }
-setTheme(localStorage.getItem('theme') || 'light');
+
+function powerOffAnimation() {
+  clearDischarge();
+  const real = document.querySelector('.time .real');
+  const cal  = $('cal');
+  // 阶段1：供电不足
+  Object.assign(real.style, { transition: 'filter 150ms, opacity 150ms', filter: 'brightness(0.75)', opacity: '0.75' });
+  Object.assign(cal.style,  { transition: 'filter 150ms, opacity 150ms', filter: 'brightness(0.75)', opacity: '0.75' });
+  // 阶段2：全段码残影
+  dischargeTids.push(setTimeout(() => {
+    $('hh').textContent = '88'; $('mm').textContent = '88';
+    cal.textContent = '8888年88月88日';
+    Object.assign(real.style, { transition: 'opacity 80ms', filter: '', opacity: '0.3' });
+    Object.assign(cal.style,  { transition: 'opacity 80ms', filter: '', opacity: '0.3' });
+  }, 150));
+  // 阶段3：垂直塌缩
+  dischargeTids.push(setTimeout(() => {
+    Object.assign(real.style, { transition: 'filter 150ms, transform 150ms', filter: 'blur(1.5px)', transform: 'scaleY(0.96)' });
+    Object.assign(cal.style,  { transition: 'filter 150ms, transform 150ms', filter: 'blur(1px)',   transform: 'scaleY(0.96)' });
+  }, 330));
+  // 阶段4：完全消失
+  dischargeTids.push(setTimeout(() => {
+    Object.assign(real.style, { transition: 'opacity 220ms', opacity: '0' });
+    Object.assign(cal.style,  { transition: 'opacity 220ms', opacity: '0' });
+  }, 480));
+}
+
+function powerOnAnimation() {
+  clearDischarge();
+  dischargeTids.push(setTimeout(() => {
+    document.querySelector('.time .real').removeAttribute('style');
+    $('cal').removeAttribute('style');
+  }, 650));
+}
 
 // ── ET66 纵向刻度推子 ──
 function buildTicks(el) {
@@ -527,9 +541,13 @@ function setupET66(trackEl, dotEl, readoutEl, initVal, onCommit) {
   return { get: () => val, set: v => update(v) };
 }
 
-const volFader = setupET66($('volTrack'), $('volDot'), $('volVal'), 50, v => api('/api/volume', {value: v}));
+const volFader = setupET66($('volTrack'), $('volDot'), $('volVal'), 50, v => {
+  if (!powered) return;
+  api('/api/volume', {value: v});
+});
 const briFader = setupET66($('briTrack'), $('briDot'), $('briVal'),
   parseInt(localStorage.getItem('briLocal') || '50', 10), v => {
+    if (!powered) return;
     if (briCli) { api('/api/brightness', {value: v}); }
     else {
       const prev = parseInt(localStorage.getItem('briLocal') || '50', 10);
@@ -550,6 +568,7 @@ window.addEventListener('load', recalcSoon);
 requestAnimationFrame(recalcFaders);
 
 function tick() {
+  if (!powered) return;
   const d = new Date();
   $('hh').textContent = String(d.getHours()).padStart(2,'0');
   $('mm').textContent = String(d.getMinutes()).padStart(2,'0');
@@ -563,6 +582,7 @@ async function api(path, body) {
 }
 
 function music(action) {
+  if (!powered) return;
   if (action === 'playpause') { lastPlaying = !lastPlaying; $('playBtn').innerHTML = lastPlaying ? ICON_PAUSE : ICON_PLAY; }
   api('/api/music', {action});
   if (action === 'prev' || action === 'next') { setTimeout(refreshStatus, 300); setTimeout(refreshStatus, 900); }
@@ -573,6 +593,7 @@ function sys(action) {
 }
 
 async function refreshStatus() {
+  if (!powered) return;
   try {
     const s = await (await fetch('/api/status')).json();
     briCli = !!s.brightnessCli;
@@ -651,6 +672,7 @@ function pushHist(hist, cols, v, scale) {
 }
 
 async function refreshStats() {
+  if (!powered) return;
   try {
     const s = await (await fetch('/api/stats')).json();
     const cpu = s.cpu ?? 0, mem = s.mem ?? 0;
