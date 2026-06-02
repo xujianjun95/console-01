@@ -219,8 +219,6 @@
   .fader-off .et66-track { pointer-events: none; cursor: default; }
   .fader-off .readout { color: var(--dim); }
 
-  /* ── 时钟盖板 ── */
-
   /* ── 实体键 ── */
   .key, .gkey {
     cursor: pointer; border: 1px solid var(--line); color: var(--text); font-family: inherit;
@@ -255,37 +253,6 @@
     box-shadow: 0 3px 7px rgba(0,0,0,.28), inset 0 1px 1px rgba(255,255,255,.45);
   }
 
-  /* ── Braun 面板按钮 ── */
-  .panel-col {
-    flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 6px;
-  }
-  .panel-row {
-    flex: 1; min-height: 0; display: flex; gap: 0;
-  }
-  .theme-btns { display: flex; flex-direction: row; gap: 4px; }
-  .theme-btns .pkey { flex: 1; }
-  .panel-section {
-    flex: 1; display: flex; flex-direction: column;
-    padding: 0 6px;
-  }
-  .panel-head {
-    font-size: 8px; font-weight: 700; letter-spacing: .15em; text-transform: uppercase;
-    color: var(--dim); padding: 3px 0 5px; margin-bottom: 2px;
-    border-bottom: 1px solid var(--line);
-  }
-  .pkey {
-    cursor: pointer; border: none; background: transparent; box-shadow: none;
-    color: var(--dim); font-family: inherit;
-    font-size: 9px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase;
-    display: flex; align-items: center; gap: 5px; text-align: left;
-    padding: 0; flex: 1; min-height: 0; border-radius: 0;
-    transition: color .1s ease;
-    -webkit-user-select: none;
-  }
-  .pkey::before { content: '○'; font-size: 8px; flex-shrink: 0; line-height: 1; }
-  .pkey.running::before { content: '●'; color: var(--accent); }
-  .pkey.pressed { color: var(--text); }
-  .pkey.pressed::before { content: '●'; color: var(--accent); }
 
   /* ── 系统监控（滚动柱状历史图） ── */
   .stats-mod { flex: 0 0 auto; gap: 7px; }
@@ -334,8 +301,6 @@
     background-repeat: round;   /* 横向自动整除，圆点不截断 */
   }
 
-  /* ── 状态灯 ── */
-  .led-box { display: none; }
 
 </style>
 </head>
@@ -393,9 +358,9 @@
         <button class="gkey" onclick="sys('lock')">Lock</button>
         <button class="gkey" onclick="sys('displaysleep')">Display</button>
         <button class="gkey" onclick="sys('sleep')">Sleep</button>
-        <button class="gkey" onclick="sys('app_codex')">Codex</button>
-        <button class="gkey" onclick="sys('app_claude')">Claude</button>
-        <button class="gkey" onclick="sys('app_terminal')">Term</button>
+        <button class="gkey" onclick="cc('yes')">Yes</button>
+        <button class="gkey" onclick="cc('always')">Always</button>
+        <button class="gkey" onclick="cc('no')">No</button>
       </div>
     </div>
 
@@ -591,6 +556,10 @@ function sys(action) {
   if (action === 'sleep' && !confirm('确定让 Mac 睡眠？')) return;
   api('/api/system', {action});
 }
+// Claude Code 权限菜单：Yes / Always / No
+function cc(action) {
+  api('/api/claude', {action});
+}
 
 async function refreshStatus() {
   if (!powered) return;
@@ -606,11 +575,6 @@ async function refreshStatus() {
     const sep = raw.indexOf(' — ');
     $('track').textContent  = sep > -1 ? raw.slice(0, sep)  : raw;
     $('artist').textContent = sep > -1 ? raw.slice(sep + 3) : '';
-    if (s.apps) {
-      document.querySelectorAll('.pkey[data-app]').forEach(btn => {
-        btn.classList.toggle('running', !!s.apps[btn.dataset.app]);
-      });
-    }
     if (s.track !== lastTrack) {
       lastTrack = s.track;
       const img = $('cover');

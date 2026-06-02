@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "console",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["/Users/xujianjun/Desktop/Project/pmtools/Console 01/server.py"],
+      "port": 8765
+    }
+  ]
+}

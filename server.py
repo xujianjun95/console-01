@@ -328,6 +328,27 @@ def system_action(action):
     return False
 
 
+# ---------- Claude Code 权限菜单 ----------
+def claude_key(action):
+    """把 Claude Code 权限确认的选择，通过模拟按键送进前台 Terminal。
+    Yes→数字键 1，Always→2，No→Esc。
+    前提：跑 claude 的 Terminal 窗口在最前台 + 已授权辅助功能权限。"""
+    if action == "yes":
+        press = 'keystroke "1"'
+    elif action == "always":
+        press = 'keystroke "2"'
+    elif action == "no":
+        press = "key code 53"  # Esc
+    else:
+        return False
+    script = (
+        'tell application "Terminal" to activate\n'
+        "delay 0.08\n"
+        f'tell application "System Events" to {press}'
+    )
+    return osa(script)[0]
+
+
 class Handler(BaseHTTPRequestHandler):
     def log_message(self, *args):
         pass  # 安静点
@@ -379,11 +400,6 @@ class Handler(BaseHTTPRequestHandler):
                 "track": m["track"],
                 "playing": m["playing"],
                 "cover": m["cover"],
-                "apps": {
-                    "codex":    _app_running("Codex"),
-                    "claude":   _app_running("Claude"),
-                    "terminal": _app_running("Terminal"),
-                },
             })
             return
         if self.path == "/api/stats":
@@ -422,6 +438,8 @@ class Handler(BaseHTTPRequestHandler):
             ok = music_control(body.get("action", ""))
         elif self.path == "/api/system":
             ok = system_action(body.get("action", ""))
+        elif self.path == "/api/claude":
+            ok = claude_key(body.get("action", ""))
         else:
             self._send(404, "not found", "text/plain")
             return
