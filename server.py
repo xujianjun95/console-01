@@ -322,6 +322,12 @@ def system_action(action):
         return run(["pmset", "displaysleepnow"])[0]
     if action == "sleep":
         return run(["pmset", "sleepnow"])[0]
+    if action == "launchpad":
+        return osa('tell application "System Events" to key code 131')[0]
+    if action == "finder":
+        return run(["open", "-a", "Finder"])[0]
+    if action == "search":
+        return osa('tell application "System Events" to key code 49 using {command down}')[0]
     if action in ("app_terminal", "app_claude", "app_codex"):
         name = {"app_terminal": "Terminal", "app_claude": "Claude", "app_codex": "Codex"}[action]
         return run(["open", "-a", name])[0]

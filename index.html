@@ -41,6 +41,9 @@
     --btn-press-text:#fff;
   }
 
+  html {
+    background-color: var(--bg2);
+  }
   html, body {
     width: 100%; height: 100%; overflow: hidden;
     color: var(--text);
@@ -52,9 +55,14 @@
   svg { display: block; }
 
   .rotate-tip {
-    display: none; position: fixed; inset: 0; z-index: 99;
+    display: flex; position: fixed; inset: 0; z-index: 99;
     flex-direction: column; align-items: center; justify-content: center; gap: 18px; color: var(--dim);
+    min-height: 100dvh;
+    background-color: var(--bg2);
     background: linear-gradient(165deg, var(--bg1), var(--bg2));
+    opacity: 0; visibility: hidden; pointer-events: none;
+    transform: scale(1.015);
+    transition: opacity .32s ease, visibility .32s ease, transform .32s cubic-bezier(.35,0,.2,1);
   }
   .rotate-tip .ph { width: 80px; height: 46px; border: 3px solid var(--dim); border-radius: 9px; animation: tilt 2.2s ease-in-out infinite; }
   .rotate-tip p { font-size: 14px; letter-spacing: 2px; }
@@ -69,8 +77,20 @@
       max(env(safe-area-inset-bottom), 9px)
       max(env(safe-area-inset-left),  11px);
     gap: 9px;
+    opacity: 1; visibility: visible; pointer-events: auto;
+    transform: scale(1);
+    transition: opacity .34s ease, visibility .34s ease, transform .34s cubic-bezier(.35,0,.2,1);
   }
-  @media (orientation: portrait) { .rotate-tip{display:flex} .wrap{display:none} }
+  @media (orientation: portrait) {
+    .rotate-tip {
+      opacity: 1; visibility: visible; pointer-events: auto;
+      transform: scale(1);
+    }
+    .wrap {
+      opacity: 0; visibility: hidden; pointer-events: none;
+      transform: scale(.975);
+    }
+  }
 
   /* ── 奶白塑料面板 ── */
   .module {
@@ -122,6 +142,7 @@
     transform: translate(-50%, -50%);
     z-index: 1;
   }
+  .et66-dot.smooth { transition: top .32s cubic-bezier(.35,0,.2,1); }
 
   /* ── 中间：时钟 + 快捷 ── */
   .center-mod { flex: 1.95; min-width: 0; padding-top: 11px; padding-bottom: 11px; justify-content: flex-start; gap: 11px; }
@@ -168,12 +189,18 @@
   .colon { display: inline-block; transform: translateY(-0.06em); }
   .real .colon { animation: blink 1.05s steps(1) infinite; }
   @keyframes blink { 50%{opacity:.25} }
-  .cal {
+  .cal-wrap {
     position: relative; z-index: 1;
     text-align: center; margin-top: 12px;
     font-size: 12px; font-weight: 500; letter-spacing: 1px;
     color: var(--lcd-cal);
+    white-space: nowrap;
   }
+  .cal-ghost {
+    position: absolute; left: 0; right: 0; top: 0; z-index: 0;
+    color: var(--lcd-off); pointer-events: none;
+  }
+  .cal { position: relative; z-index: 1; }
 
   /* ── 点阵 + 主题开关行 ── */
   .grille-row {
@@ -214,11 +241,6 @@
   }
   .sw-track.off .sw-knob { left: calc(100% - 31px); }
 
-  /* ── 电源关闭状态 ── */
-  .fader-off .et66-dot { background: var(--dim) !important; box-shadow: none !important; }
-  .fader-off .et66-track { pointer-events: none; cursor: default; }
-  .fader-off .readout { color: var(--dim); }
-
   /* ── 实体键 ── */
   .key, .gkey {
     cursor: pointer; border: 1px solid var(--line); color: var(--text); font-family: inherit;
@@ -240,7 +262,7 @@
   }
   .gkey::before { content: '○'; font-size: 13px; flex-shrink: 0; line-height: 1; }
   .gkey.pressed { background: linear-gradient(180deg, var(--btn-top), var(--btn-bot)); color: var(--text); border-color: var(--line); box-shadow: inset 0 1px 0 var(--hi), 0 1px 2px rgba(0,0,0,.12); }
-  .gkey.pressed::before { content: '●'; color: var(--accent); }
+  .gkey.pressed::before, .gkey.active::before { content: '●'; color: var(--accent); }
   .grid6 {
     flex: 1; min-height: 0; display: grid;
     grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(2, 1fr);
@@ -272,14 +294,40 @@
   /* ── 同心环点阵碟（音乐封面区） ── */
   .disc {
     flex: 1; min-height: 0; aspect-ratio: 1; align-self: center;
-    position: relative; margin-bottom: 8px;
+    position: relative; margin-bottom: 8px; overflow: hidden;
+    border-radius: 50%;
+    background:
+      radial-gradient(circle at 36% 30%, rgba(255,255,255,.28), transparent 30%),
+      linear-gradient(160deg, var(--card-top), var(--card-bot));
+    box-shadow:
+      inset 0 1px 0 var(--hi),
+      inset 0 -1px 3px rgba(0,0,0,.08),
+      0 1px 2px rgba(0,0,0,.12);
+  }
+  #cover {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    object-fit: cover;
+    border-radius: inherit;
+    opacity: 0;
+    transition: opacity .35s ease;
+    animation: coverSpin 12s linear infinite;
+    animation-play-state: paused;
+    z-index: 1;
+  }
+  .disc.has-cover.playing #cover { animation-play-state: running; }
+  @keyframes coverSpin { to { transform: rotate(360deg); } }
+  .disc.standby {
+    background: transparent;
+    box-shadow: none;
   }
   .disc-dot {
     position: absolute; width: 2.5px; height: 2.5px; border-radius: 50%;
     background: var(--dot); transform: translate(-50%, -50%);
-    transition: background .4s ease;
+    transition: background .4s ease, opacity .25s ease;
   }
   .disc-dot.on { background: var(--dot); }
+  .disc.has-cover .disc-dot { opacity: 0; }
 
   /* ── 音乐模块 ── */
   .music-mod { flex: 1; min-height: 0; }
@@ -341,7 +389,10 @@
             <span class="ghost">88<span class="colon">:</span>88</span>
             <span class="real"><span id="hh">--</span><span class="colon">:</span><span id="mm">--</span></span>
           </div>
-          <div class="cal" id="cal">----</div>
+          <div class="cal-wrap">
+            <span class="cal-ghost">8888年88月88日 星期<span id="weekGhost">-</span></span>
+            <span class="cal" id="cal"><span id="calDate">----</span> 星期<span id="weekText">-</span></span>
+          </div>
         </div>
       </div>
       <div class="grille-row">
@@ -356,11 +407,11 @@
       </div>
       <div class="grid6">
         <button class="gkey" onclick="sys('lock')">Lock</button>
-        <button class="gkey" onclick="sys('displaysleep')">Display</button>
         <button class="gkey" onclick="sys('sleep')">Sleep</button>
-        <button class="gkey" onclick="cc('yes')">Yes</button>
-        <button class="gkey" onclick="cc('always')">Always</button>
-        <button class="gkey" onclick="cc('no')">No</button>
+        <button class="gkey" id="muteBtn" onclick="mute()">Mute</button>
+        <button class="gkey" onclick="sys('launchpad')">Launch</button>
+        <button class="gkey" onclick="sys('finder')">Finder</button>
+        <button class="gkey" onclick="sys('search')">Search</button>
       </div>
     </div>
 
@@ -397,8 +448,7 @@
       </div>
 
       <div class="module music-mod">
-        <div class="disc" id="disc"></div>
-        <img id="cover" alt="" style="display:none">
+        <div class="disc" id="disc"><img id="cover" alt=""></div>
         <div class="track-name"  id="track">—</div>
         <div class="artist-name" id="artist">—</div>
         <div class="music-keys">
@@ -413,7 +463,8 @@
 
 <script>
 const $ = id => document.getElementById(id);
-let dragging = false, briCli = false, lastPlaying = null, lastTrack = null, powered = true;
+let dragging = false, briCli = false, lastPlaying = null, lastTrack = null, lastMuted = null, powered = true, muteBusy = false;
+let pendingVolume = null, pendingBrightness = null, lastSystemVolume = null, preMuteVolume = null;
 let dischargeTids = [];
 function clearDischarge() { dischargeTids.forEach(clearTimeout); dischargeTids = []; }
 
@@ -427,14 +478,25 @@ function togglePower() {
   $('swTrack').classList.toggle('off', !powered);
   document.querySelector('.fader-mod').classList.toggle('fader-off', !powered);
   if (!powered) {
+    if (lastPlaying) api('/api/music', {action: 'playpause'});
     powerOffAnimation();
     $('sCpu').textContent = '--'; $('sMem').textContent = '--';
     $('sRx').textContent = '↓ --'; $('sTx').textContent = '↑ --';
     document.querySelectorAll('.mon-fill').forEach(el => el.style.height = '0%');
     $('track').textContent = '—'; $('artist').textContent = '—';
-    $('playBtn').innerHTML = ICON_PLAY; lastPlaying = null;
+    $('disc').classList.remove('playing'); $('disc').classList.add('standby');
+    $('playBtn').innerHTML = ICON_PLAY; lastPlaying = false;
   } else {
+    $('disc').classList.remove('standby');
     powerOnAnimation();
+    if (pendingVolume != null) {
+      api('/api/volume', {value: pendingVolume});
+      pendingVolume = null;
+    }
+    if (pendingBrightness != null) {
+      commitBrightness(pendingBrightness);
+      pendingBrightness = null;
+    }
     refreshStatus(); refreshStats();
   }
 }
@@ -449,7 +511,9 @@ function powerOffAnimation() {
   // 阶段2：全段码残影
   dischargeTids.push(setTimeout(() => {
     $('hh').textContent = '88'; $('mm').textContent = '88';
-    cal.textContent = '8888年88月88日';
+    $('calDate').textContent = '8888年88月88日';
+    $('weekText').textContent = '日';
+    $('weekGhost').textContent = '日';
     Object.assign(real.style, { transition: 'opacity 80ms', filter: '', opacity: '0.3' });
     Object.assign(cal.style,  { transition: 'opacity 80ms', filter: '', opacity: '0.3' });
   }, 150));
@@ -495,33 +559,50 @@ function setupET66(trackEl, dotEl, readoutEl, initVal, onCommit) {
     const rect = trackEl.getBoundingClientRect(), pad = 6, h = rect.height - pad * 2;
     return Math.max(0, Math.min(100, Math.round((rect.bottom - clientY - pad) / h * 100)));
   }
-  function update(v) { val = v; syncET66(trackEl, dotEl, v); readoutEl.textContent = v; }
-  trackEl.addEventListener('pointerdown', e => { e.preventDefault(); trackEl.setPointerCapture(e.pointerId); dragging = true; update(getVal(e.clientY)); });
+  function update(v, smooth = false) {
+    val = v;
+    dotEl.classList.toggle('smooth', smooth);
+    syncET66(trackEl, dotEl, v);
+    readoutEl.textContent = v;
+    if (smooth) setTimeout(() => dotEl.classList.remove('smooth'), 340);
+  }
+  trackEl.addEventListener('pointerdown', e => { e.preventDefault(); dotEl.classList.remove('smooth'); trackEl.setPointerCapture(e.pointerId); dragging = true; update(getVal(e.clientY)); });
   trackEl.addEventListener('pointermove', e => { if (!trackEl.hasPointerCapture(e.pointerId)) return; update(getVal(e.clientY)); });
   ['pointerup','pointercancel'].forEach(ev => trackEl.addEventListener(ev, e => {
     if (!trackEl.hasPointerCapture(e.pointerId)) return;
     trackEl.releasePointerCapture(e.pointerId); onCommit(val); setTimeout(() => dragging = false, 400);
   }));
   update(initVal);
-  return { get: () => val, set: v => update(v) };
+  return { get: () => val, set: (v, smooth = false) => update(v, smooth) };
 }
 
 const volFader = setupET66($('volTrack'), $('volDot'), $('volVal'), 50, v => {
-  if (!powered) return;
+  if (!powered) { pendingVolume = v; return; }
+  if (lastMuted) {
+    preMuteVolume = v;
+    lastSystemVolume = v;
+    volFader.set(0);
+    api('/api/volume', {value: v});
+    return;
+  }
+  lastSystemVolume = v;
   api('/api/volume', {value: v});
 });
 const briFader = setupET66($('briTrack'), $('briDot'), $('briVal'),
   parseInt(localStorage.getItem('briLocal') || '50', 10), v => {
-    if (!powered) return;
-    if (briCli) { api('/api/brightness', {value: v}); }
-    else {
-      const prev = parseInt(localStorage.getItem('briLocal') || '50', 10);
-      let delta = v - prev;
-      if (v === 0) delta = -100; else if (v === 100) delta = 100;
-      if (delta) api('/api/brightness', {delta});
-      localStorage.setItem('briLocal', v);
-    }
+    if (!powered) { pendingBrightness = v; return; }
+    commitBrightness(v);
   });
+function commitBrightness(v) {
+  if (briCli) { api('/api/brightness', {value: v}); }
+  else {
+    const prev = parseInt(localStorage.getItem('briLocal') || '50', 10);
+    let delta = v - prev;
+    if (v === 0) delta = -100; else if (v === 100) delta = 100;
+    if (delta) api('/api/brightness', {delta});
+    localStorage.setItem('briLocal', v);
+  }
+}
 function recalcFaders() {
   syncET66($('volTrack'), $('volDot'), volFader.get());
   syncET66($('briTrack'), $('briDot'), briFader.get());
@@ -537,7 +618,12 @@ function tick() {
   const d = new Date();
   $('hh').textContent = String(d.getHours()).padStart(2,'0');
   $('mm').textContent = String(d.getMinutes()).padStart(2,'0');
-  $('cal').textContent = `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日 星期${'日一二三四五六'[d.getDay()]}`;
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const date = String(d.getDate()).padStart(2, '0');
+  $('calDate').textContent = `${d.getFullYear()}年${month}月${date}日`;
+  const week = '日一二三四五六'[d.getDay()];
+  $('weekText').textContent = week;
+  $('weekGhost').textContent = week;
 }
 tick(); setInterval(tick, 1000);
 
@@ -553,11 +639,48 @@ function music(action) {
   if (action === 'prev' || action === 'next') { setTimeout(refreshStatus, 300); setTimeout(refreshStatus, 900); }
 }
 function sys(action) {
+  if (!powered) return;
   if (action === 'sleep' && !confirm('确定让 Mac 睡眠？')) return;
   api('/api/system', {action});
 }
+async function mute() {
+  if (!powered || muteBusy) return;
+  muteBusy = true;
+  const muted = lastMuted !== true;
+  try {
+    if (muted) {
+      preMuteVolume = lastSystemVolume ?? volFader.get();
+      const muteRes = await api('/api/mute', {muted: true});
+      const volRes = await api('/api/volume', {value: 0});
+      if (muteRes?.ok || volRes?.ok) setMuteUi(true);
+    } else {
+      const restoreVolume = preMuteVolume ?? lastSystemVolume ?? volFader.get();
+      const volRes = await api('/api/volume', {value: restoreVolume});
+      const muteRes = await api('/api/mute', {muted: false});
+      if (muteRes?.ok) {
+        lastSystemVolume = volRes?.ok ? restoreVolume : lastSystemVolume;
+        setMuteUi(false);
+      }
+    }
+    setTimeout(refreshStatus, 250);
+  } finally {
+    muteBusy = false;
+  }
+}
+function setMuteUi(muted) {
+  lastMuted = muted;
+  $('muteBtn').classList.toggle('active', muted);
+  if (muted) {
+    if (preMuteVolume == null) preMuteVolume = lastSystemVolume ?? volFader.get();
+    volFader.set(0, true);
+  } else {
+    volFader.set(preMuteVolume ?? lastSystemVolume ?? volFader.get(), true);
+    preMuteVolume = null;
+  }
+}
 // Claude Code 权限菜单：Yes / Always / No
 function cc(action) {
+  if (!powered) return;
   api('/api/claude', {action});
 }
 
@@ -566,11 +689,20 @@ async function refreshStatus() {
   try {
     const s = await (await fetch('/api/status')).json();
     briCli = !!s.brightnessCli;
+    if (s.volume != null) lastSystemVolume = s.volume;
+    const effectivelyMuted = !!s.muted || (lastMuted === true && s.volume === 0);
+    if (effectivelyMuted && preMuteVolume == null && s.volume != null) preMuteVolume = s.volume;
+    if (!effectivelyMuted && !muteBusy) preMuteVolume = null;
+    if (!muteBusy) {
+      lastMuted = effectivelyMuted;
+      $('muteBtn').classList.toggle('active', effectivelyMuted);
+    }
     if (!dragging) {
-      if (s.volume != null) volFader.set(s.volume);
+      if (s.volume != null) volFader.set(effectivelyMuted ? 0 : s.volume);
       if (briCli && s.brightness != null) briFader.set(s.brightness);
     }
     if (s.playing !== lastPlaying) { lastPlaying = s.playing; $('playBtn').innerHTML = s.playing ? ICON_PAUSE : ICON_PLAY; }
+    $('disc').classList.toggle('playing', !!s.playing);
     const raw = s.track || '—';
     const sep = raw.indexOf(' — ');
     $('track').textContent  = sep > -1 ? raw.slice(0, sep)  : raw;
@@ -582,10 +714,22 @@ async function refreshStatus() {
         const url = s.cover === '/api/cover' ? '/api/cover?t=' + encodeURIComponent(s.track) : s.cover;
         img.style.opacity = 0;
         const pre = new Image();
-        pre.onload = () => { img.src = url; requestAnimationFrame(() => img.style.opacity = 1); };
-        pre.onerror = () => { img.removeAttribute('src'); img.style.opacity = 0; };
+        pre.onload = () => {
+          img.src = url;
+          $('disc').classList.add('has-cover');
+          requestAnimationFrame(() => img.style.opacity = 1);
+        };
+        pre.onerror = () => {
+          $('disc').classList.remove('has-cover');
+          img.removeAttribute('src');
+          img.style.opacity = 0;
+        };
         pre.src = url;
-      } else { img.style.opacity = 0; setTimeout(() => img.removeAttribute('src'), 450); }
+      } else {
+        $('disc').classList.remove('has-cover');
+        img.style.opacity = 0;
+        setTimeout(() => img.removeAttribute('src'), 450);
+      }
     }
   } catch(e) {}
 }
