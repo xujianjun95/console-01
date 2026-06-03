@@ -300,6 +300,211 @@ def get_stats():
     }
 
 
+# ---------- 蓝牙电量 ----------
+_bt_cache = {"ts": 0.0, "devices": []}
+
+
+def _kind_from_text(text):
+    t = (text or "").lower()
+    if "keyboard" in t:
+        return "keyboard"
+    if "mouse" in t:
+        return "mouse"
+    if "trackpad" in t:
+        return "trackpad"
+    if "headphone" in t or "airpods" in t or "earbud" in t:
+        return "headphones"
+    if "speaker" in t:
+        return "speaker"
+    return "device"
+
+
+def _add_bt_device(devices, name, battery, kind="device"):
+    if not name or battery is None:
+        return
+    try:
+        pct = int(float(str(battery).strip().rstrip("%")))
+    except Exception:
+        return
+    if pct < 0 or pct > 100:
+        return
+    key = re.sub(r"\s+", " ", name).strip().lower()
+    if not key:
+        return
+    for d in devices:
+        if d["_key"] == key:
+            d["battery"] = pct
+            if d.get("kind") == "device" and kind != "device":
+                d["kind"] = kind
+            return
+    devices.append({
+        "_key": key,
+        "name": re.sub(r"\s+", " ", name).strip(),
+        "battery": pct,
+        "kind": kind,
+    })
+
+
+def _norm_bt_addr(value):
+    if not value:
+        return ""
+    raw = str(value).strip().strip('"').lower()
+    if raw.startswith("<") and raw.endswith(">"):
+        raw = raw[1:-1]
+    raw = re.sub(r"[^0-9a-f]", "", raw)
+    if len(raw) != 12:
+        return ""
+    return ":".join(raw[i:i + 2] for i in range(0, 12, 2))
+
+
+def _connected_bt_info():
+    ok, out = run(["system_profiler", "SPBluetoothDataType", "-json"])
+    info = {}
+    if not ok:
+        return info
+    try:
+        raw = json.loads(out)
+        groups = raw.get("SPBluetoothDataType", [])
+        connected = groups[0].get("device_connected", []) if groups else []
+        for item in connected:
+            for name, props in item.items():
+                addr = _norm_bt_addr(props.get("device_address"))
+                if addr:
+                    info[addr] = {
+                        "name": name,
+                        "kind": _kind_from_text(props.get("device_minorType", "") + " " + name),
+                    }
+    except Exception:
+        pass
+    return info
+
+
+def _bluetooth_from_ioreg():
+    ok, out = run(["ioreg", "-r", "-l", "-w0", "-k", "BatteryPercent"])
+    if not ok:
+        return []
+    connected = _connected_bt_info()
+    devices = []
+    current = {}
+
+    def flush():
+        if not current:
+            return
+        battery = current.get("BatteryPercent")
+        if battery is None:
+            for k, v in current.items():
+                lk = k.lower()
+                if lk in ("batterypercent", "battery percentage", "battery level") and re.search(r"\d", v):
+                    m = re.search(r"-?\d+(?:\.\d+)?", v)
+                    if m:
+                        battery = m.group(0)
+                        break
+        if battery is None:
+            return
+        addr = (_norm_bt_addr(current.get("DeviceAddress")) or
+                _norm_bt_addr(current.get("BD_ADDR")) or
+                _norm_bt_addr(current.get("SerialNumber")))
+        matched = connected.get(addr, {})
+        name = (matched.get("name") or current.get("Product") or current.get("Product Name") or
+                current.get("DeviceName") or current.get("Name") or
+                current.get("DisplayName"))
+        kind = matched.get("kind") or _kind_from_text(" ".join([name or "", current.get("DeviceType", ""), current.get("Transport", "")]))
+        _add_bt_device(devices, name, battery, kind)
+
+    for line in out.splitlines():
+        if line.lstrip().startswith("+-o "):
+            flush()
+            current = {}
+            m = re.search(r"\+-o\s+(.+?)\s{2,}<", line)
+            if m:
+                current["Name"] = m.group(1)
+            continue
+        m = re.search(r'"([^"]+)"\s=\s(.+)$', line.strip())
+        if m:
+            key, val = m.group(1), m.group(2).strip()
+            current[key] = val.strip('"')
+    flush()
+    return devices
+
+
+def _bluetooth_from_profiler():
+    ok, out = run(["system_profiler", "SPBluetoothDataType"])
+    if not ok:
+        return []
+    devices = []
+    in_connected = False
+    current = None
+
+    def flush():
+        if not current:
+            return
+        _add_bt_device(devices, current.get("name"), current.get("battery"),
+                       _kind_from_text(current.get("kind", "") + " " + current.get("name", "")))
+
+    for raw in out.splitlines():
+        line = raw.rstrip()
+        stripped = line.strip()
+        if stripped == "Connected:":
+            in_connected = True
+            continue
+        if stripped == "Not Connected:":
+            flush()
+            return devices
+        if not in_connected or not stripped:
+            continue
+        if raw.startswith("          ") and stripped.endswith(":") and not raw.startswith("              "):
+            flush()
+            current = {"name": stripped[:-1]}
+            continue
+        if current and ":" in stripped:
+            k, v = [x.strip() for x in stripped.split(":", 1)]
+            lk = k.lower()
+            if "minor type" in lk or "type" == lk:
+                current["kind"] = v
+            if "battery" in lk:
+                current["battery"] = v
+    flush()
+    return devices
+
+
+def _bluetooth_from_log():
+    ok, out = run([
+        "log", "show", "--last", "10m",
+        "--predicate", 'process == "bluetoothd" OR process == "bluetoothuserd" OR process == "ControlCenter"',
+        "--style", "compact",
+    ])
+    if not ok:
+        return []
+
+    devices = []
+    for line in out.splitlines():
+        if "CBPowerSource" not in line or "Battery" not in line:
+            continue
+        m = re.search(r"Nm '([^']+)'.*?AcCa ([^,]+).*?Battery\s+-?(\d+)%", line)
+        if not m:
+            continue
+        name, accessory, battery = m.group(1), m.group(2), m.group(3)
+        _add_bt_device(devices, name, battery, _kind_from_text(accessory + " " + name))
+    return devices
+
+
+def get_bluetooth():
+    now = time.time()
+    if now - _bt_cache["ts"] < 30:
+        return {"devices": _bt_cache["devices"]}
+
+    devices = _bluetooth_from_ioreg()
+    for d in _bluetooth_from_profiler():
+        _add_bt_device(devices, d.get("name"), d.get("battery"), d.get("kind", "device"))
+    for d in _bluetooth_from_log():
+        _add_bt_device(devices, d.get("name"), d.get("battery"), d.get("kind", "device"))
+    for d in devices:
+        d.pop("_key", None)
+    _bt_cache["ts"] = now
+    _bt_cache["devices"] = devices[:3]
+    return {"devices": _bt_cache["devices"]}
+
+
 # ---------- 系统 ----------
 def lock_screen():
     """用 macOS 私有锁屏接口，立即锁屏，无需辅助功能权限。"""
@@ -410,6 +615,9 @@ class Handler(BaseHTTPRequestHandler):
             return
         if self.path == "/api/stats":
             self._json(get_stats())
+            return
+        if self.path == "/api/bluetooth":
+            self._json(get_bluetooth())
             return
         if self.path.startswith("/api/cover"):
             res = export_music_cover()
