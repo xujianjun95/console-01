@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Console 01">
+  <defs>
+    <linearGradient id="case" x1="116" y1="76" x2="404" y2="446" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#F5F1E8"/>
+      <stop offset="0.55" stop-color="#E2DED4"/>
+      <stop offset="1" stop-color="#C8C3B6"/>
+    </linearGradient>
+    <linearGradient id="lcd" x1="142" y1="156" x2="376" y2="288" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#C8CEC0"/>
+      <stop offset="1" stop-color="#AEB6A9"/>
+    </linearGradient>
+    <radialGradient id="button" cx="0" cy="0" r="1" gradientTransform="matrix(42 48 -48 42 374 346)" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FF9B67"/>
+      <stop offset="0.52" stop-color="#EC5E2A"/>
+      <stop offset="1" stop-color="#C94216"/>
+    </radialGradient>
+    <filter id="shadow" x="56" y="62" width="400" height="420" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="16" stdDeviation="18" flood-color="#2E2A22" flood-opacity="0.28"/>
+    </filter>
+    <filter id="inner" x="120" y="140" width="272" height="160" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="#21251F" flood-opacity="0.35"/>
+    </filter>
+  </defs>
+
+  <rect width="512" height="512" rx="112" fill="#D8D5CC"/>
+  <g filter="url(#shadow)">
+    <rect x="82" y="78" width="348" height="360" rx="58" fill="url(#case)"/>
+    <path d="M118 118h248c25 0 46 21 46 46v190c0 29-23 52-52 52H138c-29 0-52-23-52-52V160c0-23 19-42 42-42Z" fill="#EEEAE2"/>
+    <path d="M130 112h240c28 0 50 22 50 50v58c-26-24-64-38-114-42H164c-45 0-77 15-96 43v-53c0-31 25-56 56-56Z" fill="#FFFFFF" opacity="0.36"/>
+  </g>
+
+  <g filter="url(#inner)">
+    <rect x="126" y="142" width="260" height="160" rx="22" fill="#838A7E"/>
+    <rect x="136" y="151" width="240" height="142" rx="16" fill="url(#lcd)"/>
+    <path d="M146 170h220" stroke="#F2F4ED" stroke-opacity="0.3" stroke-width="4" stroke-linecap="round"/>
+    <g fill="#2C302A">
+      <path d="M178 205h54l-8 12h-46l-8-12Zm-4 22h13l-9 42h-13l9-42Zm61 0h13l-9 42h-13l9-42Zm-58 49h46l8 12h-54l-8-12Z"/>
+      <path d="M267 205h54l-8 12h-46l-8-12Zm-4 22h13l-9 42h-13l9-42Zm61 0h13l-9 42h-13l9-42Zm-58 49h46l8 12h-54l-8-12Z"/>
+      <rect x="245" y="228" width="8" height="9" rx="3"/>
+      <rect x="242" y="263" width="8" height="9" rx="3"/>
+    </g>
+  </g>
+
+  <g opacity="0.58" fill="#37342E">
+    <rect x="128" y="334" width="96" height="10" rx="5"/>
+    <rect x="128" y="359" width="72" height="10" rx="5"/>
+    <rect x="128" y="384" width="106" height="10" rx="5"/>
+  </g>
+  <circle cx="370" cy="362" r="47" fill="url(#button)"/>
+  <circle cx="354" cy="344" r="12" fill="#FFFFFF" opacity="0.45"/>
+  <path d="M256 406c-50 0-94-8-124-21" stroke="#BAB4A7" stroke-width="7" stroke-linecap="round" opacity="0.5"/>
+</svg>

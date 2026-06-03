@@ -586,18 +586,19 @@ class Handler(BaseHTTPRequestHandler):
             except FileNotFoundError:
                 self._send(404, "index.html 缺失", "text/plain")
             return
-        # 静态文件（仅限项目根目录下的顶层文件，防目录穿越）
+        # 静态文件（限制在项目目录内，允许 icons/ 等资源子目录）
         fname = self.path.lstrip("/").split("?")[0]
-        if fname and "/" not in fname and "\\" not in fname and ".." not in fname:
-            fpath = os.path.join(HERE, fname)
+        if fname and "\\" not in fname:
+            fpath = os.path.abspath(os.path.join(HERE, fname))
             if os.path.isfile(fpath):
                 ext = os.path.splitext(fname)[1].lower()
                 ctype = {
                     ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".png": "image/png",
                     ".gif": "image/gif", ".svg": "image/svg+xml", ".webp": "image/webp",
                     ".woff2": "font/woff2", ".woff": "font/woff",
+                    ".webmanifest": "application/manifest+json", ".json": "application/json",
                 }.get(ext)
-                if ctype:
+                if ctype and (fpath == HERE or fpath.startswith(HERE + os.sep)):
                     with open(fpath, "rb") as f:
                         self._send(200, f.read(), ctype)
                     return
