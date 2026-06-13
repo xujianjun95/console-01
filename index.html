@@ -6,12 +6,19 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="中控台">
-<meta name="theme-color" content="#D8D5CC">
+<meta name="theme-color" id="themeColor" content="#D8D5CC">
 <link rel="manifest" href="site.webmanifest">
 <link rel="icon" type="image/svg+xml" href="icons/console-icon.svg">
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
 <link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png">
 <title>Mac 中控台</title>
+<script>
+try {
+  if (localStorage.getItem('consoleTheme') === 'night') {
+    document.documentElement.dataset.theme = 'night';
+  }
+} catch(e) {}
+</script>
 <style>
 @font-face {
   font-family: 'DSEG7Modern';
@@ -25,6 +32,7 @@
 
   /* ── 默认：博朗 拟物 · 奶白塑料 ── */
   :root, :root[data-theme="light"] {
+    --theme-dur:780ms; --theme-ease:cubic-bezier(.35,0,.2,1);
     --bg1:#DAD8D1; --bg2:#C9C7BF;
     --card-top:#F2F0EA; --card-bot:#E2E0D8;
     --text:#33322D; --dim:#8E8C82;
@@ -46,6 +54,29 @@
     --btn-press-text:#fff;
   }
 
+  :root[data-theme="night"] {
+    --theme-dur:900ms; --theme-ease:cubic-bezier(.35,0,.2,1);
+    --bg1:#4D4A43; --bg2:#34322E;
+    --card-top:#76736A; --card-bot:#5F5C54;
+    --text:#1F1E1A; --dim:#37352F;
+    --line:rgba(0,0,0,.16);
+    --accent:#873519; --accent-top:#9D4826; --accent-bot:#662611;
+    --groove:#4A4740; --groove-sh:rgba(0,0,0,.42);
+    --btn-top:#747168; --btn-bot:#56534C;
+    --thumb-top:#89867C; --thumb-bot:#55524B;
+    --hi:rgba(255,255,255,.16);
+    --drop:rgba(10,9,7,.42);
+    --lcd-bg1:#424838; --lcd-bg2:#303529;
+    --lcd-on:#171B15; --lcd-off:rgba(23,27,21,.10);
+    --lcd-cal:rgba(23,27,21,.40);
+    --scan:rgba(0,0,0,.03);
+    --time-glow:none;
+    --dot:rgba(0,0,0,.38);
+    --tick:#56544E; --tick-major:#30302C;
+    --mon-track:rgba(0,0,0,.16); --mon-cpu:#40552A; --mon-mem:#873519; --mon-net:#403E38;
+    --btn-press-text:#E4DDD4;
+  }
+
   html {
     background-color: var(--bg2);
   }
@@ -55,7 +86,7 @@
     background: linear-gradient(165deg, var(--bg1), var(--bg2));
     font-family: -apple-system, "SF Pro Display", "Helvetica Neue", "PingFang SC", sans-serif;
     -webkit-user-select: none; user-select: none;
-    transition: background .35s ease, color .35s ease;
+    transition: background var(--theme-dur) var(--theme-ease), color var(--theme-dur) var(--theme-ease);
   }
   svg { display: block; }
 
@@ -107,11 +138,15 @@
       0 1px 1px rgba(0,0,0,.05),
       0 10px 22px var(--drop);
     padding: 11px 12px; display: flex; flex-direction: column; flex-shrink: 0;
-    transition: background .35s ease, border-color .35s ease;
+    transition:
+      background var(--theme-dur) var(--theme-ease),
+      border-color var(--theme-dur) var(--theme-ease),
+      box-shadow var(--theme-dur) var(--theme-ease);
   }
   .mod-title {
     position: relative; width: 100%; text-align: center;
     font-size: 10px; color: var(--dim); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 6px;
+    transition: color var(--theme-dur) var(--theme-ease);
   }
   .mod-title::before { display: none; }
 
@@ -123,6 +158,7 @@
   .readout {
     font-size: 13px; font-weight: 700; color: var(--accent);
     font-variant-numeric: tabular-nums; height: 17px; margin-top: 4px;
+    transition: color var(--theme-dur) var(--theme-ease);
   }
   .et66-track {
     flex: 1; position: relative; width: 100%; min-height: 0;
@@ -136,6 +172,7 @@
   .et66-tick {
     display: block; width: 16px; height: 1.5px;
     background: var(--tick); border-radius: 1px; flex-shrink: 0;
+    transition: background var(--theme-dur) var(--theme-ease);
   }
   .et66-tick.major { width: 26px; height: 2px; background: var(--tick-major); }
   .et66-dot {
@@ -146,6 +183,7 @@
     pointer-events: none;
     transform: translate(-50%, -50%);
     z-index: 1;
+    transition: background var(--theme-dur) var(--theme-ease), box-shadow var(--theme-dur) var(--theme-ease);
   }
   .et66-dot.smooth { transition: top .32s cubic-bezier(.35,0,.2,1); }
 
@@ -160,6 +198,7 @@
     display: flex; flex-direction: column; align-items: center; justify-content: center;
     background: linear-gradient(160deg, var(--lcd-bg1), var(--lcd-bg2));
     box-shadow: inset 0 2px 6px rgba(0,0,0,.32), inset 0 0 0 2px rgba(0,0,0,.06), 0 1px 0 var(--hi);
+    transition: background var(--theme-dur) var(--theme-ease), box-shadow var(--theme-dur) var(--theme-ease), filter var(--theme-dur) var(--theme-ease);
   }
   .clock-screen::before {   /* 顶部反光弧 */
     content: ''; position: absolute; inset: 0; border-radius: 14px; pointer-events: none; z-index: 2;
@@ -190,7 +229,7 @@
     position: absolute; left: 0; right: 0; top: 0; z-index: 0;
     color: var(--lcd-off); pointer-events: none;
   }
-  .time .real { position: relative; z-index: 1; color: var(--lcd-on); text-shadow: var(--time-glow); }
+  .time .real { position: relative; z-index: 1; color: var(--lcd-on); text-shadow: var(--time-glow); transition: color var(--theme-dur) var(--theme-ease), text-shadow var(--theme-dur) var(--theme-ease), opacity var(--theme-dur) var(--theme-ease); }
   .colon { display: inline-block; transform: translateY(-0.06em); }
   .real .colon { animation: blink 1.05s steps(1) infinite; }
   @keyframes blink { 50%{opacity:.25} }
@@ -200,6 +239,7 @@
     font-size: 12px; font-weight: 500; letter-spacing: 1px;
     color: var(--lcd-cal);
     white-space: nowrap;
+    transition: color var(--theme-dur) var(--theme-ease);
   }
   .cal-ghost {
     position: absolute; left: 0; right: 0; top: 0; z-index: 0;
@@ -224,11 +264,13 @@
     position: relative;
     display: flex; align-items: center; justify-content: space-between;
     padding: 0 9px;
+    transition: background var(--theme-dur) var(--theme-ease), border-color var(--theme-dur) var(--theme-ease), box-shadow var(--theme-dur) var(--theme-ease);
   }
   .sw-label {
     font-size: 11px; font-weight: 300; color: var(--text); opacity: .4;
     font-family: "Helvetica Neue", Arial, sans-serif;
     position: relative; z-index: 0; line-height: 1;
+    transition: color var(--theme-dur) var(--theme-ease), opacity var(--theme-dur) var(--theme-ease);
   }
   .sw-knob {
     position: absolute; left: 3px;
@@ -236,13 +278,18 @@
     background: linear-gradient(160deg, var(--card-top), var(--card-bot));
     border: 1px solid var(--line);
     box-shadow: 0 2px 6px rgba(0,0,0,.3), inset 0 1px 0 var(--hi);
-    transition: left .28s cubic-bezier(.4,0,.2,1);
+    transition:
+      left .28s cubic-bezier(.4,0,.2,1),
+      background var(--theme-dur) var(--theme-ease),
+      border-color var(--theme-dur) var(--theme-ease),
+      box-shadow var(--theme-dur) var(--theme-ease);
     z-index: 1;
     display: flex; align-items: center; justify-content: center;
   }
   .sw-knob::after {
     content: ''; width: 12px; height: 2.5px;
     background: var(--accent); border-radius: 2px;
+    transition: background var(--theme-dur) var(--theme-ease);
   }
   .sw-track.off .sw-knob { left: calc(100% - 31px); }
 
@@ -251,7 +298,12 @@
     cursor: pointer; border: 1px solid var(--line); color: var(--text); font-family: inherit;
     background: linear-gradient(180deg, var(--btn-top), var(--btn-bot));
     box-shadow: inset 0 1px 0 var(--hi), 0 1px 2px rgba(0,0,0,.12), 0 3px 6px rgba(0,0,0,.07);
-    transition: transform .1s ease, background .12s ease, color .12s ease, box-shadow .12s ease;
+    transition:
+      transform .1s ease,
+      background var(--theme-dur) var(--theme-ease),
+      color var(--theme-dur) var(--theme-ease),
+      border-color var(--theme-dur) var(--theme-ease),
+      box-shadow var(--theme-dur) var(--theme-ease);
   }
   .key { flex: 1; display: flex; align-items: center; justify-content: center; border-radius: 7px; }
   .key.pressed, .gkey.pressed {
@@ -267,6 +319,7 @@
   }
   .gkey::before { content: '○'; font-size: 13px; flex-shrink: 0; line-height: 1; }
   .gkey.pressed { background: linear-gradient(180deg, var(--btn-top), var(--btn-bot)); color: var(--text); border-color: var(--line); box-shadow: inset 0 1px 0 var(--hi), 0 1px 2px rgba(0,0,0,.12); }
+  .gkey::before { transition: color var(--theme-dur) var(--theme-ease); }
   .gkey.pressed::before, .gkey.active::before { content: '●'; color: var(--accent); }
   .grid6 {
     flex: 1; min-height: 0; display: grid;
@@ -290,18 +343,22 @@
   .bt-name {
     min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
     font-size: 9px; font-weight: 600; color: var(--dim); letter-spacing: .02em;
+    transition: color var(--theme-dur) var(--theme-ease);
   }
   .bt-bat {
     display: flex; align-items: center; justify-content: flex-end; gap: 4px;
     color: var(--dim); font-size: 9px; font-weight: 700; font-variant-numeric: tabular-nums;
+    transition: color var(--theme-dur) var(--theme-ease);
   }
   .bt-cell {
     width: 15px; height: 8px; border: 1px solid var(--dim); border-radius: 2px;
     position: relative; padding: 1px; opacity: .8;
+    transition: border-color var(--theme-dur) var(--theme-ease);
   }
   .bt-cell::after {
     content: ''; position: absolute; right: -3px; top: 2px;
     width: 2px; height: 4px; border-radius: 0 1px 1px 0; background: var(--dim);
+    transition: background var(--theme-dur) var(--theme-ease);
   }
   .bt-fill {
     display: block; height: 100%; width: 0; border-radius: 1px;
@@ -322,6 +379,7 @@
       inset 0 1px 0 var(--hi),
       inset 0 -1px 3px rgba(0,0,0,.08),
       0 1px 2px rgba(0,0,0,.12);
+    transition: background var(--theme-dur) var(--theme-ease), box-shadow var(--theme-dur) var(--theme-ease);
   }
   #cover {
     position: absolute; inset: 0;
@@ -351,6 +409,7 @@
   /* ── 音乐模块 ── */
   .music-mod { flex: 1; min-height: 0; }
   .track-name  { flex: 0 0 auto; font-size: 13px; font-weight: 600; color: var(--text); text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .track-name, .artist-name { transition: color var(--theme-dur) var(--theme-ease); }
   .artist-name { flex: 0 0 auto; font-size: 11px; color: var(--dim); text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
   .music-keys  { flex: 0 0 auto; display: flex; gap: 14px; align-items: center; justify-content: center; height: 60px; margin-top: 8px; }
   .music-keys .key { flex: 0 0 auto; width: 42px; height: 42px; border-radius: 50%; }
@@ -366,6 +425,14 @@
     background-image: radial-gradient(circle, var(--dot) 25%, transparent 26%);
     background-size: 8px 8px;
     background-repeat: round;   /* 横向自动整除，圆点不截断 */
+    transition: opacity var(--theme-dur) var(--theme-ease), filter var(--theme-dur) var(--theme-ease);
+  }
+  :root[data-theme="night"] .grille { opacity: .72; filter: brightness(.82); }
+  :root.theme-changing .clock-screen { animation: lcdSettle 900ms var(--theme-ease); }
+  @keyframes lcdSettle {
+    0% { filter: brightness(1.06); }
+    45% { filter: brightness(.82); }
+    100% { filter: brightness(1); }
   }
 
 
@@ -430,7 +497,7 @@
         <button class="gkey" id="muteBtn" onclick="mute()">Mute</button>
         <button class="gkey" onclick="sys('launchpad')">Launch</button>
         <button class="gkey" onclick="sys('finder')">Finder</button>
-        <button class="gkey" onclick="sys('search')">Search</button>
+        <button class="gkey" id="nightBtn" onclick="toggleNight()">Night</button>
       </div>
     </div>
 
@@ -468,6 +535,7 @@
 <script>
 const $ = id => document.getElementById(id);
 let dragging = false, briCli = false, lastPlaying = null, lastTrack = null, lastMuted = null, powered = true, muteBusy = false;
+let nightMode = document.documentElement.dataset.theme === 'night';
 let pendingVolume = null, pendingBrightness = null, lastSystemVolume = null, preMuteVolume = null;
 let playbackPending = null;
 let dischargeTids = [];
@@ -476,6 +544,22 @@ function clearDischarge() { dischargeTids.forEach(clearTimeout); dischargeTids =
 const ICON_PLAY  = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 5.5v13a1 1 0 0 0 1.5.9l11-6.5a1 1 0 0 0 0-1.8l-11-6.5A1 1 0 0 0 7 5.5z"/></svg>';
 const ICON_PAUSE = '<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6.5" y="5" width="4" height="14" rx="1.2"/><rect x="13.5" y="5" width="4" height="14" rx="1.2"/></svg>';
 $('playBtn').innerHTML = ICON_PLAY;
+
+function applyTheme() {
+  document.documentElement.dataset.theme = nightMode ? 'night' : 'light';
+  $('nightBtn')?.classList.toggle('active', nightMode);
+  $('themeColor')?.setAttribute('content', nightMode ? '#4E4B45' : '#D8D5CC');
+  try { localStorage.setItem('consoleTheme', nightMode ? 'night' : 'light'); } catch(e) {}
+}
+function toggleNight() {
+  nightMode = !nightMode;
+  document.documentElement.classList.remove('theme-changing');
+  void document.documentElement.offsetWidth;
+  document.documentElement.classList.add('theme-changing');
+  applyTheme();
+  setTimeout(() => document.documentElement.classList.remove('theme-changing'), 950);
+}
+applyTheme();
 
 // 电源开关
 function togglePower() {

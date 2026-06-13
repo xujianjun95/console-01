@@ -12,6 +12,7 @@ import re
 import subprocess
 import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from urllib.parse import urlparse
 
 PORT = 8765
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -214,7 +215,17 @@ def export_music_cover():
 
 
 # ---------- 系统监控 ----------
-_CPU_CORES = max(1, int(run(["sysctl", "-n", "hw.logicalcpu"])[1].strip() or 1))
+def get_cpu_cores():
+    ok, out = run(["sysctl", "-n", "hw.logicalcpu"])
+    if ok:
+        try:
+            return max(1, int(out.strip()))
+        except (TypeError, ValueError):
+            pass
+    return max(1, os.cpu_count() or 1)
+
+
+_CPU_CORES = get_cpu_cores()
 _net_prev = {"ts": 0.0, "rx": 0, "tx": 0, "rx_speed": 0.0, "tx_speed": 0.0}
 
 
@@ -578,7 +589,8 @@ class Handler(BaseHTTPRequestHandler):
         self._send(code, json.dumps(obj, ensure_ascii=False))
 
     def do_GET(self):
-        if self.path == "/" or self.path == "/index.html":
+        req_path = urlparse(self.path).path
+        if req_path == "/" or req_path == "/index.html":
             path = os.path.join(HERE, "index.html")
             try:
                 with open(path, "rb") as f:
@@ -587,7 +599,7 @@ class Handler(BaseHTTPRequestHandler):
                 self._send(404, "index.html 缺失", "text/plain")
             return
         # 静态文件（限制在项目目录内，允许 icons/ 等资源子目录）
-        fname = self.path.lstrip("/").split("?")[0]
+        fname = req_path.lstrip("/")
         if fname and "\\" not in fname:
             fpath = os.path.abspath(os.path.join(HERE, fname))
             if os.path.isfile(fpath):
@@ -602,7 +614,7 @@ class Handler(BaseHTTPRequestHandler):
                     with open(fpath, "rb") as f:
                         self._send(200, f.read(), ctype)
                     return
-        if self.path == "/api/status":
+        if req_path == "/api/status":
             m = get_music()
             self._json({
                 "volume": get_volume(),
@@ -614,13 +626,13 @@ class Handler(BaseHTTPRequestHandler):
                 "cover": m["cover"],
             })
             return
-        if self.path == "/api/stats":
+        if req_path == "/api/stats":
             self._json(get_stats())
             return
-        if self.path == "/api/bluetooth":
+        if req_path == "/api/bluetooth":
             self._json(get_bluetooth())
             return
-        if self.path.startswith("/api/cover"):
+        if req_path == "/api/cover":
             res = export_music_cover()
             if res:
                 self._send(200, res[0], res[1])
@@ -630,6 +642,7 @@ class Handler(BaseHTTPRequestHandler):
         self._send(404, "not found", "text/plain")
 
     def do_POST(self):
+        req_path = urlparse(self.path).path
         length = int(self.headers.get("Content-Length", 0))
         raw = self.rfile.read(length) if length else b"{}"
         try:
@@ -638,22 +651,22 @@ class Handler(BaseHTTPRequestHandler):
             body = {}
 
         ok = False
-        if self.path == "/api/volume":
+        if req_path == "/api/volume":
             ok = set_volume(body.get("value", 0))
-        elif self.path == "/api/mute":
+        elif req_path == "/api/mute":
             ok = set_muted(bool(body.get("muted")))
-        elif self.path == "/api/brightness":
+        elif req_path == "/api/brightness":
             if "value" in body:
                 ok = set_brightness(body["value"])
             elif "delta" in body:
                 ok = adjust_brightness_delta(body["delta"])
             elif "nudge" in body:
                 ok = nudge_brightness(body["nudge"] == "up")
-        elif self.path == "/api/music":
+        elif req_path == "/api/music":
             ok = music_control(body.get("action", ""))
-        elif self.path == "/api/system":
+        elif req_path == "/api/system":
             ok = system_action(body.get("action", ""))
-        elif self.path == "/api/claude":
+        elif req_path == "/api/claude":
             ok = claude_key(body.get("action", ""))
         else:
             self._send(404, "not found", "text/plain")
