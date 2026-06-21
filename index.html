@@ -387,10 +387,16 @@ try {
     object-fit: cover;
     border-radius: inherit;
     opacity: 0;
-    transition: opacity .35s ease;
+    filter: brightness(1) saturate(1);
+    transition:
+      opacity .35s ease,
+      filter var(--theme-dur) var(--theme-ease);
     animation: coverSpin 12s linear infinite;
     animation-play-state: paused;
     z-index: 1;
+  }
+  :root[data-theme="night"] #cover {
+    filter: brightness(.45) saturate(.7);
   }
   .disc.has-cover.playing #cover { animation-play-state: running; }
   @keyframes coverSpin { to { transform: rotate(360deg); } }
@@ -414,7 +420,21 @@ try {
   .music-keys  { flex: 0 0 auto; display: flex; gap: 14px; align-items: center; justify-content: center; height: 60px; margin-top: 8px; }
   .music-keys .key { flex: 0 0 auto; width: 42px; height: 42px; border-radius: 50%; }
   .music-keys .key svg { width: 16px; height: 16px; }
-  .music-keys .key.accent { width: 56px; height: 56px; }
+  .music-keys .key.accent {
+    width: 56px; height: 56px;
+    filter: brightness(1) saturate(1);
+    transition:
+      transform .1s ease,
+      background var(--theme-dur) var(--theme-ease),
+      color var(--theme-dur) var(--theme-ease),
+      border-color var(--theme-dur) var(--theme-ease),
+      box-shadow var(--theme-dur) var(--theme-ease),
+      filter var(--theme-dur) var(--theme-ease);
+  }
+  :root[data-theme="night"] .music-keys .key.accent {
+    color: #BEB7AE;
+    filter: brightness(.58) saturate(.72);
+  }
   .music-keys .key.accent svg { width: 24px; height: 24px; }
 
   /* ── 博朗扬声器网格装饰条 ── */
